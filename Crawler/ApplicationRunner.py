@@ -1,0 +1,24 @@
+from video_sniffer import sniff_all_videos
+from voip_sniffer import sniff_all_voip
+from cloud_sniffer import sniff_all_cloud
+from download_sniffer import sniff_all_downloads
+from browser_sniffer import sniff_all_browsing
+
+def main():
+    print("\n🎬 Capturing video traffic...")
+    sniff_all_videos()
+
+    print("\n📞 Capturing VOIP traffic...")
+    sniff_all_voip()
+
+    print("\n☁️ Capturing cloud upload traffic...")
+    sniff_all_cloud()
+
+    print("\n📥 Capturing file download traffic...")
+    sniff_all_downloads()
+
+    print("\n🌐 Capturing browsing traffic...")
+    sniff_all_browsing()
+
+if __name__ == "__main__":
+    main()

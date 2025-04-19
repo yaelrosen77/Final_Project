@@ -1,0 +1,26 @@
+tldextract~=5.2.0
+selenium
+pyshark~=0.6
+undetected-chromedriver==3.5.4
+pandas
+openpyxl
+
+go to terminal on PyCharm and type "pip install pytest-playwright"
+than type 'playwright install' - it will take sometime to work.
+
+כרגע עובד על ממשק של ווייפיי- 
+
+להריץ כאדמין את הפרויקט
+psutil~=7.0.0
+playwright~=1.51.0
+
+וקוד DOCKER הרצת
+docker build -t sniffer-app .
+
+set DISPLAY=host.docker.internal:0.0
+docker run --cap-add=NET_ADMIN --network=bridge -e DISPLAY=host.docker.internal:0.0 -v "C:\Users\Adam\Desktop\Crawler:/app" -it sniffer-app python google_login.py
+
+set DISPLAY=host.docker.internal:0.0
+docker run --cap-add=NET_ADMIN --network=bridge -e DISPLAY=host.docker.internal:0.0 -v "C:\Users\Adam\Desktop\Crawler:/app" -it sniffer-app
+
+

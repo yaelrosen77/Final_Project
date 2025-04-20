@@ -43,7 +43,7 @@ def sniff_video(url, click_class=""):
                     try_iframes_for_video(driver,pcap_file)
             except Exception as e:
                 print(f"[!] Error during click: {e}")
-
+        time.sleep(1)
         play_video_if_found(driver,pcap_file)
 
     except Exception as e:
@@ -109,6 +109,6 @@ def play_video_if_found(driver, pcap_file) -> bool:
         return False
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")
+    links = load_links_from_excel("Video Str.")[:5] #[21:]
     for url, click_class in links:
         sniff_video(url, click_class)

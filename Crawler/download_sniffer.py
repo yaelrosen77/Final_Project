@@ -17,6 +17,7 @@ def sniff_file_download(url, click_class=""):
 
     print(f"\n🟢 Starting download capture for {app_name}...")
 
+    # Start tshark
     tshark_proc = subprocess.Popen(
         ["tshark", "-i", "eth0", "-a", "duration:40", "-w", pcap_file],
         stdout=subprocess.DEVNULL,
@@ -24,61 +25,62 @@ def sniff_file_download(url, click_class=""):
     )
 
     time.sleep(1)
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
-        context = browser.new_context(accept_downloads=True)
+        context = browser.new_context()
         page = context.new_page()
         page.goto(url, timeout=60000, wait_until="domcontentloaded")
 
-        try:
-            triggered = False
+        triggered = False
+        previous_url = page.url
 
-            # 1. Click by given class
-            if isinstance(click_class, str) and click_class.strip() != "":
-                try:
-                    page.wait_for_selector(f'.{click_class}', timeout=5000)
-                    page.click(f'.{click_class}')
-                    print(f"[🖱️] Clicked element with class '{click_class}'")
-                    triggered = True
-                except Exception as e:
-                    print(f"[⚠️] Could not click class '{click_class}': {e}")
+        def try_click(selector, label):
+            nonlocal triggered
+            try:
+                page.wait_for_selector(selector, timeout=5000)
+                page.click(selector)
+                print(f"[🖱️] Clicked with selector ({label}): {selector}")
+                triggered = True
+            except Exception as e:
+                print(f"[⚠️] {label} selector failed: {e}")
 
-            # 2. Default download selectors
-            if not triggered:
-                try:
-                    download_selector = 'a[href$=".pdf"], a[download], button:has-text("Download")'
-                    page.wait_for_selector(download_selector, timeout=5000)
-                    page.click(download_selector)
-                    print("[⬇️] Download triggered by default selector.")
-                    triggered = True
-                except Exception as e:
-                    print(f"[⚠️] Default selector failed: {e}")
+        # 1. Click by class name
+        if click_class and not triggered:
+            try_click(click_class, "class")
 
-            # 3. Try by class or id that contains "download"
-            if not triggered:
-                try:
-                    selector = '[class*="download" i], [id*="download" i]'
-                    page.wait_for_selector(selector, timeout=10000, state="attached")
-                    page.click(selector)
-                    print("[🔍] Download triggered by 'download' in class or ID.")
-                    triggered = True
-                except Exception as e:
-                    print(f"[⚠️] Fallback selector failed: {e}")
+        # 2. Default selector
+        if not triggered:
+            try_click('a[href$=".pdf"], a[download], button:has-text("Download")', "Default")
 
-            if not triggered:
-                print(f"[❌] No download trigger found.")
+        # 3. Fallback by class or id
+        if not triggered:
+            try_click('[class*="download" i], [id*="download" i]', "Fallback")
 
-            time.sleep(7)
+        time.sleep(2)  # זמן לדף לטעון מחדש או להחליף כתובת
+        current_url = page.url
 
-        except Exception as e:
-            print(f"[❌] Failed to trigger download: {e}")
-        finally:
-            browser.close()
+        if current_url != previous_url and current_url.lower().endswith(".pdf"):
+            print(f"[🌍] Detected navigation to PDF: {current_url}")
+            response = context.request.get(current_url)
+            filename = os.path.basename(current_url).split("?")[0]
+            save_path = os.path.join(out_dir, filename)
+            with open(save_path, "wb") as f:
+                f.write(response.body())
+            print(f"[✅] PDF saved to: {save_path}")
+        else:
+            print("[❌] No PDF detected after interaction.")
+        time.sleep(6)
 
+        browser.close()
     tshark_proc.wait()
-    print(f"✅ Download capture done: {pcap_file}")
+    print(f"✅ Sniffing complete: {pcap_file}")
+
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")
+    links = load_links_from_excel("Download")[:3]
     for url, click_class in links:
         sniff_file_download(url, click_class)
+
+if __name__ == "__main__":
+    sniff_all_downloads()

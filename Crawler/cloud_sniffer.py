@@ -81,3 +81,6 @@ def sniff_all_cloud():
     links = load_links_from_excel("Cloud")[:2]
     for url, className in links:
         sniff_cloud_upload(url,className)
+
+if __name__ == "__main__":
+    sniff_all_cloud()

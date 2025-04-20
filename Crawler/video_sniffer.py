@@ -44,7 +44,9 @@ def sniff_video(url, click_class=""):
             except Exception as e:
                 print(f"[!] Error during click: {e}")
         time.sleep(1)
-        play_video_if_found(driver,pcap_file)
+        videoFound = play_video_if_found(driver,pcap_file)
+        if not click_class and not videoFound:
+            try_iframes_for_video(driver,pcap_file)
 
     except Exception as e:
         print(f"[!] General error: {e}")

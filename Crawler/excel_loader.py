@@ -7,7 +7,7 @@ def load_links_from_excel(sheet_name: str, excel_path="App_direct_links.xlsx"):
 
     df = pd.read_excel(excel_path, sheet_name=sheet_name, header=None)
     urls = df[1].dropna().tolist()
-    class_names = df[0].fillna("").tolist() if sheet_name.lower().startswith("video") else [None] * len(urls)
+    class_names = df[0].fillna("").tolist()
 
     results = []
     for i in range(len(urls)):

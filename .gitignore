@@ -1,0 +1,16 @@
+# קבצים זמניים
+__pycache__/
+*.pyc
+
+# תיקיות שלא צריך להעלות
+download/
+video/
+chrome-profile/
+
+# סביבת עבודה
+env/
+venv/
+
+# קבצי הרצה
+*.log
+*.pcap

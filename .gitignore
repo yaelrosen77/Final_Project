@@ -14,5 +14,6 @@ venv/
 # קבצי הרצה
 *.log
 *.pcap
+*.pcapng
 *.csv
 *.xlsx

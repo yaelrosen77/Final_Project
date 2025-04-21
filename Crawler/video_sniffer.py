@@ -116,7 +116,7 @@ def play_video_if_found(driver, pcap_file) -> bool:
         return False
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")[13:21]
+    links = load_links_from_excel("Video Str.")[21:]
     for url, play_class, pre_class in links:
         sniff_video(url, play_class, pre_class)
 

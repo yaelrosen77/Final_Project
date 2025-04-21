@@ -6,6 +6,7 @@ __pycache__/
 download/
 video/
 chrome-profile/
+Past Work/
 
 # סביבת עבודה
 env/
@@ -17,3 +18,5 @@ venv/
 *.pcapng
 *.csv
 *.xlsx
+*.txt
+*.html

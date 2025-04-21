@@ -13,7 +13,7 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def sniff_audio(url, click_class=""):
+def sniff_audio(url, play_class="", pre_class=""):
     app_name = get_app_name(url)
     out_dir = f"/app/audio"
     ensure_dir(out_dir)
@@ -42,9 +42,9 @@ def sniff_audio(url, click_class=""):
             stderr=subprocess.DEVNULL,
         )
 
-        if click_class:
+        if play_class:
             try:
-                clicked = click_play_button(driver, click_class)
+                clicked = click_play_button(driver, play_class)
                 if not clicked:
                     try_iframes_for_audio(driver,pcap_file)
             except Exception as e:
@@ -79,8 +79,8 @@ def try_iframes_for_audio(driver, pcap_file) -> bool:
 
 def sniff_all_audios():
     links = load_links_from_excel("Audio Str.")[:2] #[21:]
-    for url, click_class in links:
-        sniff_audio(url, click_class)
+    for url, play_class, pre_class in links:
+        sniff_audio(url, play_class, pre_class)
 
 if __name__ == "__main__":
     sniff_all_audios()

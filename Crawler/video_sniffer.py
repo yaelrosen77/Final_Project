@@ -7,13 +7,13 @@ from selenium.common.exceptions import NoSuchElementException
 from utils import get_app_name
 from excel_loader import load_links_from_excel
 
-wait_time = 30
+wait_time = 5
 
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def sniff_video(url, click_class=""):
+def sniff_video(url, play_class="", pre_class=""):
     app_name = get_app_name(url)
     out_dir = f"/app/video"
     ensure_dir(out_dir)
@@ -36,36 +36,41 @@ def sniff_video(url, click_class=""):
         driver.get(url)
         time.sleep(2)
 
-        if click_class:
+        if play_class:
             try:
-                clicked = click_play_button(driver, click_class)
+                clicked = click_play_button(driver, play_class)
                 if not clicked:
                     try_iframes_for_video(driver,pcap_file)
             except Exception as e:
                 print(f"[!] Error during click: {e}")
         time.sleep(1)
         videoFound = play_video_if_found(driver,pcap_file)
-        if not click_class and not videoFound:
+        if not play_class and not videoFound:
             try_iframes_for_video(driver,pcap_file)
-
     except Exception as e:
         print(f"[!] General error: {e}")
     finally:
         driver.quit()
         print(f"✅ Video capture done: {pcap_file}")
 
-def click_play_button(driver, class_names: str) -> bool:
-    class_groups = [cls.strip() for cls in class_names.split(",") if cls.strip()]
-    for class_name in class_groups:
-        elements = driver.find_elements(By.CSS_SELECTOR, f".{class_name}")
-        for element in elements:
+def click_play_button(driver, class_or_id_names: str) -> bool:
+    groups = [name.strip() for name in class_or_id_names.split(",") if name.strip()]
+    for name in groups:
+        selectors = [By.ID,By.CLASS_NAME]
+        for by in selectors:
             try:
-                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-                time.sleep(0.5)
-                element.click()
-                print(f"[+] Clicked element with class '{class_name}'")
-                return True
-            except Exception:
+                elements = driver.find_elements(by, name)
+                for element in elements:
+                    try:
+                        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+                        time.sleep(0.5)
+                        element.click()
+                        print(f"[+] Clicked element with class '{name}'")
+                        return True
+                    except Exception:
+                        continue
+            except Exception as e:
+                print(f"[!] Failed to click element with {name}")
                 continue
     return False
 
@@ -111,9 +116,9 @@ def play_video_if_found(driver, pcap_file) -> bool:
         return False
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")[:3] #[21:]
-    for url, click_class in links:
-        sniff_video(url, click_class)
+    links = load_links_from_excel("Video Str.")[13:21]
+    for url, play_class, pre_class in links:
+        sniff_video(url, play_class, pre_class)
 
 if __name__ == "__main__":
     sniff_all_videos()

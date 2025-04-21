@@ -13,20 +13,20 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def try_iframes_for_game(driver,click_class) -> bool:
+def try_iframes_for_game(driver,play_class) -> bool:
     iframes = driver.find_elements(By.TAG_NAME, "iframe")
     clicked = False
     for iframe in iframes:
         try:
             driver.switch_to.frame(iframe)
             time.sleep(1)
-            clicked = click_by_class(driver, click_class)
+            clicked = click_by_class(driver, play_class)
             driver.switch_to.default_content()
         except:
             driver.switch_to.default_content()
     return clicked
 
-def sniff_game(url, click_class=""):
+def sniff_game(url, play_class="", pre_class=""):
     app_name = get_app_name(url)
     out_dir = f"/app/game"
     ensure_dir(out_dir)
@@ -46,10 +46,10 @@ def sniff_game(url, click_class=""):
         time.sleep(5)
 
         clicked = False
-        if click_class:
-            clicked = click_by_class(driver, click_class)
+        if play_class:
+            clicked = click_by_class(driver, play_class)
         if not clicked:
-            if not try_iframes_for_game(driver,click_class):
+            if not try_iframes_for_game(driver,play_class):
                 print("[❌] No play button found.")
                 return
 
@@ -106,8 +106,8 @@ def click_by_text(driver, text: str) -> bool:
 
 def sniff_all_games():
     links = load_links_from_excel("Games")[:3]
-    for url, click_class in links:
-        sniff_game(url, click_class)
+    for url, play_class, pre_class in links:
+        sniff_game(url, play_class, pre_class)
 
 if __name__ == "__main__":
     sniff_all_games()

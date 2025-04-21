@@ -9,7 +9,7 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def sniff_file_download(url, click_class=""):
+def sniff_file_download(url, play_class="", pre_class=""):
     app_name = get_app_name(url)
     out_dir = f"/app/download"
     ensure_dir(out_dir)
@@ -46,8 +46,8 @@ def sniff_file_download(url, click_class=""):
                 print(f"[⚠️] {label} selector failed: {e}")
 
         # 1. Click by class name
-        if click_class and not triggered:
-            try_click(click_class, "class")
+        if play_class and not triggered:
+            try_click(play_class, "class")
 
         # 2. Default selector
         if not triggered:
@@ -79,8 +79,8 @@ def sniff_file_download(url, click_class=""):
 
 def sniff_all_downloads():
     links = load_links_from_excel("Download")[:3]
-    for url, click_class in links:
-        sniff_file_download(url, click_class)
+    for url, play_class, pre_class in links:
+        sniff_file_download(url, play_class, pre_class)
 
 if __name__ == "__main__":
     sniff_all_downloads()

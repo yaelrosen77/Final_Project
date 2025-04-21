@@ -8,7 +8,7 @@ from excel_loader import load_links_from_excel
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
-def sniff_cloud_upload(url, className):
+def sniff_cloud_upload(url, play_class="", pre_class=""):
     app_name = get_app_name(url)
     out_dir = f"/app/cloud"
     ensure_dir(out_dir)
@@ -54,15 +54,15 @@ def sniff_cloud_upload(url, className):
             except:
                 print("[ℹ️] No clickable submit button found.")
 
-            # ← כאן התנאי המתוקן: רק אם className לא ריק
-            if isinstance(className, str) and className.strip() != '':
+            # ← כאן התנאי המתוקן: רק אם play_class לא ריק
+            if isinstance(play_class, str) and play_class.strip() != '':
                 try:
-                    class_btn = page.query_selector(f'.{className}')
+                    class_btn = page.query_selector(f'.{play_class}')
                     if class_btn:
                         class_btn.click()
-                        print(f"[🖱️] Clicked button with class: {className}")
+                        print(f"[🖱️] Clicked button with class: {play_class}")
                     else:
-                        print(f"[ℹ️] No button found with class: {className}")
+                        print(f"[ℹ️] No button found with class: {play_class}")
                 except Exception as e:
                     print(f"[⚠️] Failed to click class button: {e}")
 
@@ -79,8 +79,8 @@ def sniff_cloud_upload(url, className):
 
 def sniff_all_cloud():
     links = load_links_from_excel("Cloud")[:2]
-    for url, className in links:
-        sniff_cloud_upload(url,className)
+    for url, play_class, pre_class in links:
+        sniff_cloud_upload(url, play_class, pre_class)
 
 if __name__ == "__main__":
     sniff_all_cloud()

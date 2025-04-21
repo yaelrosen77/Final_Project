@@ -68,7 +68,7 @@ def sniff_browsing(url):
 
 def sniff_all_browsing():
     links = load_links_from_excel("Browsing")[:3]
-    for url, _ in links:
+    for url, _, _ in links:
         sniff_browsing(url)
 
 if __name__ == "__main__":

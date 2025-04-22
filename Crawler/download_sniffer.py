@@ -78,7 +78,7 @@ def sniff_file_download(url, play_class="", pre_class=""):
 
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[:3]
+    links = load_links_from_excel("Download")[3:]
     for url, play_class, pre_class in links:
         sniff_file_download(url, play_class, pre_class)
 

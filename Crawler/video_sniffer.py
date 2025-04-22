@@ -7,7 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 from utils import get_app_name
 from excel_loader import load_links_from_excel
 
-wait_time = 5
+wait_time = 15
 
 def ensure_dir(path):
     if not os.path.exists(path):
@@ -42,21 +42,22 @@ def sniff_video(url, play_class="", pre_class=""):
                 if not clicked:
                     try_iframes_for_video(driver,pcap_file)
             except Exception as e:
-                print(f"[!] Error during click: {e}")
+                print(f"[⚠️] Error during click: {e}")
         time.sleep(1)
         videoFound = play_video_if_found(driver,pcap_file)
-        if not play_class and not videoFound:
+        if not videoFound:
             try_iframes_for_video(driver,pcap_file)
     except Exception as e:
-        print(f"[!] General error: {e}")
+        print(f"[⚠️] General error: {e}")
     finally:
         driver.quit()
-        print(f"✅ Video capture done: {pcap_file}")
+        print(f"[✅] Video capture done: {pcap_file}")
 
 def click_play_button(driver, class_or_id_names: str) -> bool:
     groups = [name.strip() for name in class_or_id_names.split(",") if name.strip()]
+    selectors = [By.ID,By.CLASS_NAME]
     for name in groups:
-        selectors = [By.ID,By.CLASS_NAME]
+        curNameDone = False
         for by in selectors:
             try:
                 elements = driver.find_elements(by, name)
@@ -66,15 +67,17 @@ def click_play_button(driver, class_or_id_names: str) -> bool:
                         time.sleep(0.5)
                         element.click()
                         print(f"[+] Clicked element with class '{name}'")
-                        return True
-                    except Exception:
-                        continue
+                        curNameDone = True
+                        break
+                    except Exception: continue
             except Exception as e:
                 print(f"[!] Failed to click element with {name}")
                 continue
-    return False
+            if curNameDone: break
+    return curNameDone
 
 def try_iframes_for_video(driver,pcap_file) -> bool:
+    print(f"[🎬] Trying iframe")
     iframes = driver.find_elements(By.TAG_NAME, "iframe")
     for iframe in iframes:
         try:
@@ -113,10 +116,11 @@ def play_video_if_found(driver, pcap_file) -> bool:
             tshark_proc.wait()
         return True
     except NoSuchElementException:
+        print(f"[❌] Failed to play <video>")
         return False
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")[21:]
+    links = load_links_from_excel("Video Str.")[24:]
     for url, play_class, pre_class in links:
         sniff_video(url, play_class, pre_class)
 

@@ -17,14 +17,6 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
 
     print(f"\n🟢 Starting cloud upload capture for {app_name}...")
 
-    tshark_proc = subprocess.Popen(
-        ["tshark", "-i", "eth0", "-a", "duration:40", "-w", pcap_file],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-
-    time.sleep(1)
-
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         context = browser.new_context()
@@ -43,6 +35,14 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
 
             input_selector = 'input[type="file"]'
             page.wait_for_selector(input_selector, timeout=10000, state="attached")
+
+            tshark_proc = subprocess.Popen(
+                ["tshark", "-i", "eth0", "-a", "duration:40", "-w", pcap_file],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            time.sleep(1)
+
             page.set_input_files(input_selector, fake_file)
             print(f"[📤] File uploaded using {input_selector}")
 

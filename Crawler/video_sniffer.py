@@ -7,66 +7,11 @@ from selenium.common.exceptions import NoSuchElementException
 from utils import get_app_name
 from excel_loader import load_links_from_excel
 from base_sniffer import BaseSniffer
-wait_time = 2
+wait_time = 5
 
 class VideoSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
         super().__init__(url, play_class, skip_class,"video")
-
-    def skip_ad_if_present(self):
-        if not self.skip_class:
-            return
-        print("[👀] Checking for ad...")
-        time.sleep(7)
-        try:
-            ad_elements = self.driver.find_elements(By.CLASS_NAME, self.skip_class)
-            if ad_elements:
-                for el in ad_elements:
-                    try:
-                        el.click()
-                        print("[⏭] Skipped ad.")
-                        return
-                    except: pass
-                print("[⏳] Ad still playing...")
-            else: print("[✅] No ad detected.")
-        except: print("[❌] Can't find skip.")
-        print("[🕒] Ad timeout reached or not skippable.")
-
-    def click_play_button(self, tries=0):
-        time.sleep(2)
-        groups = [name.strip() for name in self.play_class.split(",") if name.strip()]
-        selectors = [By.ID, By.CLASS_NAME]
-        nameDone = [False for _ in range(len(groups))]
-        notFoundSoUnloaded = True
-        tries += 1
-        for i,name in enumerate(groups):
-            for by in selectors:
-                try:
-                    elements = self.driver.find_elements(by, name)
-                    if len(elements) > 0: notFoundSoUnloaded = False
-                    for element in elements:
-                        try:
-                            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-                            time.sleep(0.5)
-                            element.click()
-                            print(f"[+] Clicked element with '{name}'")
-                            self.play_class = ",".join([c for c in self.play_class.split(",") if c.strip() != name])
-                            nameDone[i] = True
-                            break
-                        except: continue
-                except Exception as e:
-                    print(f"[!] Failed to click element with {name}")
-                    continue
-                if nameDone[i]: break
-        if notFoundSoUnloaded:
-            print(f"[⚠️] Unloaded '{self.play_class}'")
-            if tries > 2:
-                print(f"[⚠️] Failed to load '{self.play_class}'")
-                return False
-            self.click_play_button(tries)
-        for curNameDone in nameDone:
-            if curNameDone: return True
-        return False
 
     def click_outof_iframe(self,iframe):
         if not self.play_class: return False
@@ -100,7 +45,6 @@ class VideoSniffer(BaseSniffer):
     def play_video_if_found(self):
         try:
             self.driver.find_element(By.TAG_NAME, "video")
-            self.skip_ad_if_present()
             time.sleep(2)
             self.driver.execute_script("""
                 const video = document.querySelector('video');
@@ -133,12 +77,14 @@ class VideoSniffer(BaseSniffer):
                 time.sleep(2)
                 self.driver.execute_script("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
                 time.sleep(2)
+                self.driver.execute_script("window.scrollTo({ top: 0, behavior: 'smooth' });")
+                time.sleep(2)
             except Exception as e:
                 print(f"[⚠️] Scroll error: {e}")
             clicked = True
             if self.play_class:
                 clicked = self.click_play_button()
-            time.sleep(2)
+            time.sleep(5)
             played = self.play_video_if_found()
             if not clicked or not played:
                 time.sleep(2)
@@ -150,7 +96,7 @@ class VideoSniffer(BaseSniffer):
             print(f"[✅] Video capture done: {self.pcap_file}")
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")[41:]
+    links = load_links_from_excel("Video Str.")[47:]
     for url, play_class, skip_class in links:
         sniffer = VideoSniffer(url, play_class, skip_class)
         sniffer.sniff()

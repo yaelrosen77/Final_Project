@@ -1,4 +1,4 @@
-from video_sniffer import sniff_all_videos, sniff_video
+from video_sniffer import sniff_all_videos
 from voip_sniffer import sniff_all_voip
 from cloud_sniffer import sniff_all_cloud
 from download_sniffer import sniff_all_downloads

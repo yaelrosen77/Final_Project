@@ -33,3 +33,39 @@ class BaseSniffer:
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--disable-blink-features=AutomationControlled")
         self.driver = uc.Chrome(options=options)
+
+    def click_play_button(self, tries=0):
+        time.sleep(2)
+        groups = [name.strip() for name in self.play_class.split(",") if name.strip()]
+        selectors = [By.ID, By.CLASS_NAME]
+        nameDone = [False for _ in range(len(groups))]
+        notFoundSoUnloaded = True
+        tries += 1
+        for i,name in enumerate(groups):
+            for by in selectors:
+                try:
+                    elements = self.driver.find_elements(by, name)
+                    if len(elements) > 0: notFoundSoUnloaded = False
+                    for element in elements:
+                        try:
+                            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+                            time.sleep(0.5)
+                            element.click()
+                            print(f"[+] Clicked element with '{name}'")
+                            self.play_class = ",".join([c for c in self.play_class.split(",") if c.strip() != name])
+                            nameDone[i] = True
+                            break
+                        except: continue
+                except Exception as e:
+                    print(f"[!] Failed to click element with {name}")
+                    continue
+                if nameDone[i]: break
+        if notFoundSoUnloaded:
+            print(f"[⚠️] Unloaded '{self.play_class}'")
+            if tries > 2:
+                print(f"[⚠️] Failed to load '{self.play_class}'")
+                return False
+            self.click_play_button(tries)
+        for curNameDone in nameDone:
+            if curNameDone: return True
+        return False

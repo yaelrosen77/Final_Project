@@ -17,6 +17,10 @@ playwright~=1.51.0
 וקוד DOCKER הרצת
 docker build -t sniffer-app .
 
+pip install openpyxl
+pip install undetected-chromedriver
+
+
 set DISPLAY=host.docker.internal:0.0
 docker run --cap-add=NET_ADMIN --network=bridge -e DISPLAY=host.docker.internal:0.0 -v "C:\Users\Adam\Desktop\Final_Project\Crawler:/app" -it sniffer-app python google_login.py
 

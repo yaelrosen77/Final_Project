@@ -157,3 +157,7 @@ def sniff_all_videos():
 
 if __name__ == "__main__":
     sniff_all_videos()
+
+
+def sniff_video():
+    return None

@@ -1,0 +1,17 @@
+EXCEL MARKS
+Blue = requires registration
+Red = not under clickable class
+Green = verified
+Purple = failed on non-bots verification
+Orange = Doesnt include download links - replace or add some upload
+Yellow = manually can be download but in chromium just opens or there are several links and it marks the first one
+Pink = clickable class is under drop-down or other pop-up window
+
+
+Todo:
+cancel pre-class col inside the code and the file
+check out if there is a class attribute in red
+see whether delaying download by second will help (yellow case)
+for links of type upload can upload and download the same file
+for links that are under drop down check if they change URL
+add some manually popular links pcaps

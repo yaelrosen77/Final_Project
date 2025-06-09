@@ -5,6 +5,7 @@ from download_sniffer import sniff_all_downloads
 from browser_sniffer import sniff_all_browsing
 from audio_sniffer import sniff_all_audios
 from game_sniffer import sniff_all_games
+
 def main():
     print("\n🎬 Capturing video traffic...")
     sniff_all_videos()

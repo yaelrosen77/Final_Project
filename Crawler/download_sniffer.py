@@ -28,57 +28,65 @@ def sniff_file_download(url, play_class="", pre_class=""):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
+        context = browser.new_context(accept_downloads=True)
         page = context.new_page()
-        page.goto(url, timeout=60000, wait_until="domcontentloaded")
 
+        # Get list of files BEFORE clicking
+        existing_files = set(os.listdir(out_dir))
+
+        page.goto(url, timeout=60000, wait_until="domcontentloaded")
         triggered = False
-        previous_url = page.url
 
         def try_click(selector, label):
             nonlocal triggered
             try:
-                page.wait_for_selector(selector, timeout=5000)
-                page.click(selector)
-                print(f"[🖱️] Clicked with selector ({label}): {selector}")
-                triggered = True
+                elements = page.query_selector_all(selector)
+                for el in elements:
+                    try:
+                        el.click(force=True)
+                        print(f"[🖱️] Clicked one of ({label}) matches: {selector}")
+                        time.sleep(1.5)
+                        triggered = True
+                        break
+                    except Exception:
+                        continue
+                if not triggered:
+                    print(f"[⚠️] No clickable element found for ({label}): {selector}")
             except Exception as e:
                 print(f"[⚠️] {label} selector failed: {e}")
 
-        # 1. Click by class name
+        # Try clicking in order
         if play_class and not triggered:
-            try_click(play_class, "class")
+            selector = play_class.strip()
+            if not selector.startswith(".") and not selector.startswith("#") and " " not in selector:
+                selector = f".{selector}"
+            try_click(selector, "class")
 
-        # 2. Default selector
         if not triggered:
             try_click('a[href$=".pdf"], a[download], button:has-text("Download")', "Default")
 
-        # 3. Fallback by class or id
         if not triggered:
             try_click('[class*="download" i], [id*="download" i]', "Fallback")
 
-        time.sleep(2)  # זמן לדף לטעון מחדש או להחליף כתובת
-        current_url = page.url
+        # Wait for the file to be written
+        print("⏳ Waiting for file to be written...")
+        time.sleep(10)
 
-        if current_url != previous_url and current_url.lower().endswith(".pdf"):
-            print(f"[🌍] Detected navigation to PDF: {current_url}")
-            response = context.request.get(current_url)
-            filename = os.path.basename(current_url).split("?")[0]
-            save_path = os.path.join(out_dir, filename)
-            with open(save_path, "wb") as f:
-                f.write(response.body())
-            print(f"[✅] PDF saved to: {save_path}")
+        # Check for new files
+        new_files = set(os.listdir(out_dir)) - existing_files
+        if new_files:
+            for file in new_files:
+                print(f"[✅] File detected in folder: {file}")
         else:
-            print("[❌] No PDF detected after interaction.")
-        time.sleep(6)
+            print("[❌] No file was downloaded or detected in folder.")
 
         browser.close()
+
     tshark_proc.wait()
     print(f"✅ Sniffing complete: {pcap_file}")
 
-
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[3:]
+    links = load_links_from_excel("Download")[53:]
     for url, play_class, pre_class in links:
         sniff_file_download(url, play_class, pre_class)
 

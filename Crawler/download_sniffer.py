@@ -86,7 +86,7 @@ def sniff_file_download(url, play_class="", pre_class=""):
     print(f"✅ Sniffing complete: {pcap_file}")
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[53:]
+    links = load_links_from_excel("Download")[69:]
     for url, play_class, pre_class in links:
         sniff_file_download(url, play_class, pre_class)
 

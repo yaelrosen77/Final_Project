@@ -33,6 +33,46 @@ class BaseSniffer:
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--disable-blink-features=AutomationControlled")
         self.driver = uc.Chrome(options=options)
+    def setup_website(self):
+        print(f"[⚙️] Opening: {self.url}")
+        self.driver.get(self.url)
+        try:
+            time.sleep(2)
+            self.driver.execute_script("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
+            time.sleep(2)
+            self.driver.execute_script("window.scrollTo({ top: 0, behavior: 'smooth' });")
+            time.sleep(2)
+        except Exception as e:
+            print(f"[⚠️] Scroll error: {e}")
+
+    def FooterAcceptCookie(self, shadowRootElem):
+        try:
+            footers = self.driver.find_elements(By.XPATH, "//page-footer | //audio-player-wc")
+            for footer in footers:
+                clicked = self.driver.execute_script("""
+                    const footer = arguments[0];
+                    const selector = arguments[1];
+                    const root = footer.shadowRoot;
+                    if (!root) return false;
+                    const btn = root.querySelector(selector);
+                    if (btn) {
+                        btn.focus();
+                        btn.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                        btn.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+                        btn.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+                        return true;
+                    }
+                    return false;
+                """, footer, shadowRootElem)
+                if clicked:
+                    print("✅ Clicked 'Accept all' inside <page-footer>'s shadow DOM")
+                    return
+                else:
+                    print("❌ Could not find 'Accept all' button inside shadow DOM")
+        except Exception as e:
+            print("No page-footer's shadow DOM found")
+
+    def play_if_found(self): pass
 
     def click_play_button(self, tries=0):
         time.sleep(2)
@@ -44,16 +84,18 @@ class BaseSniffer:
         for i,name in enumerate(groups):
             for by in selectors:
                 try:
-                    elements = self.driver.find_elements(by, name)
+                    elements = self.driver.find_elements(by,name) if name[0]!=':' else self.driver.find_elements(By.XPATH,f"//button[contains(normalize-space(string()),'{name[1:]}')]")
                     if len(elements) > 0: notFoundSoUnloaded = False
                     for element in elements:
                         try:
                             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
                             time.sleep(0.5)
+                            if element.tag_name.lower() == "audio": return element
                             element.click()
                             print(f"[+] Clicked element with '{name}'")
                             self.play_class = ",".join([c for c in self.play_class.split(",") if c.strip() != name])
                             nameDone[i] = True
+                            time.sleep(1)
                             break
                         except: continue
                 except Exception as e:
@@ -69,3 +111,33 @@ class BaseSniffer:
         for curNameDone in nameDone:
             if curNameDone: return True
         return False
+
+    def try_iframes(self):
+        print(f"[🎬] Trying iframe...")
+        self.driver.switch_to.default_content()
+        iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+        for iframe in iframes:
+            try:
+                self.driver.switch_to.frame(iframe)
+                time.sleep(2)
+                clicked = True
+                if self.play_class:
+                    clicked = self.click_play_button()
+                    if clicked and not self.click_outof_iframe(iframe):
+                        self.try_iframes()
+                    time.sleep(2)
+                if clicked and self.play_if_found():
+                    self.driver.switch_to.default_content()
+                    return True
+                self.driver.switch_to.default_content()
+            except:
+                self.driver.switch_to.default_content()
+        return False
+    def click_outof_iframe(self,iframe):
+        if not self.play_class: return False
+        self.driver.switch_to.default_content()
+        clicked = self.click_play_button()
+        time.sleep(2)
+        self.play_if_found()
+        self.driver.switch_to.frame(iframe)
+        return clicked

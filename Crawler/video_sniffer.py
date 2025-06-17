@@ -13,36 +13,7 @@ class VideoSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
         super().__init__(url, play_class, skip_class,"video")
 
-    def click_outof_iframe(self,iframe):
-        if not self.play_class: return False
-        self.driver.switch_to.default_content()
-        clicked = self.click_play_button()
-        time.sleep(2)
-        self.play_video_if_found()
-        self.driver.switch_to.frame(iframe)
-        return clicked
-    def try_iframes_for_video(self):
-        print(f"[🎬] Trying iframe...")
-        iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
-        for iframe in iframes:
-            try:
-                self.driver.switch_to.frame(iframe)
-                time.sleep(2)
-                clicked = True
-                if self.play_class:
-                    clicked = self.click_play_button()
-                    if clicked and not self.click_outof_iframe(iframe):
-                        self.try_iframes_for_video()
-                    time.sleep(2)
-                if clicked and self.play_video_if_found():
-                    self.driver.switch_to.default_content()
-                    return True
-                self.driver.switch_to.default_content()
-            except:
-                self.driver.switch_to.default_content()
-        return False
-
-    def play_video_if_found(self):
+    def play_if_found(self):
         try:
             self.driver.find_element(By.TAG_NAME, "video")
             time.sleep(2)
@@ -68,35 +39,27 @@ class VideoSniffer(BaseSniffer):
 
     def sniff(self):
         self.ensure_dir()
-        print(f"\n🟢 Starting video capture for {self.app_name}...")
+        print(f"\n🟢 Starting capture for {self.app_name}...")
         self.setup_driver()
         try:
-            print(f"[⚙️] Opening: {self.url}")
-            self.driver.get(self.url)
-            try:
-                time.sleep(2)
-                self.driver.execute_script("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
-                time.sleep(2)
-                self.driver.execute_script("window.scrollTo({ top: 0, behavior: 'smooth' });")
-                time.sleep(2)
-            except Exception as e:
-                print(f"[⚠️] Scroll error: {e}")
+            self.setup_website()
             clicked = True
+            self.FooterAcceptCookie(self.skip_class)
             if self.play_class:
                 clicked = self.click_play_button()
             time.sleep(5)
-            played = self.play_video_if_found()
+            played = self.play_if_found()
             if not clicked or not played:
                 time.sleep(2)
-                self.try_iframes_for_video()
+                self.try_iframes()
         except Exception as e:
             print(f"[⚠️] General error: {e}")
         finally:
             self.driver.quit()
-            print(f"[✅] Video capture done: {self.pcap_file}")
+            print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")[47:]
+    links = load_links_from_excel("Video Str.")[63:] # [64:]
     for url, play_class, skip_class in links:
         sniffer = VideoSniffer(url, play_class, skip_class)
         sniffer.sniff()

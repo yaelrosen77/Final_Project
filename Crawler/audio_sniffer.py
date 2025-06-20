@@ -56,7 +56,7 @@ class AudioSniffer(BaseSniffer):
 
 def sniff_all_audios():
     links = load_links_from_excel("Audio Str.")[33:]
-    for url, play_class, skip_class in links:o
+    for url, play_class, skip_class in links:
         sniffer = AudioSniffer(url, play_class, skip_class)
         sniffer.sniff()
 

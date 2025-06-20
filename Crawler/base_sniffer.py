@@ -47,8 +47,11 @@ class BaseSniffer:
 
     def FooterAcceptCookie(self, shadowRootElem):
         try:
-            footers = self.driver.find_elements(By.XPATH, "//page-footer | //audio-player-wc")
-            for footer in footers:
+            shadow_hosts = self.driver.execute_script("""
+                return Array.from(document.querySelectorAll("*"))
+                    .filter(el => el.shadowRoot !== null);
+            """)
+            for host in shadow_hosts:
                 clicked = self.driver.execute_script("""
                     const footer = arguments[0];
                     const selector = arguments[1];
@@ -63,7 +66,7 @@ class BaseSniffer:
                         return true;
                     }
                     return false;
-                """, footer, shadowRootElem)
+                """, host, shadowRootElem)
                 if clicked:
                     print("✅ Clicked 'Accept all' inside <page-footer>'s shadow DOM")
                     return
@@ -123,7 +126,7 @@ class BaseSniffer:
                 clicked = True
                 if self.play_class:
                     clicked = self.click_play_button()
-                    if clicked and not self.click_outof_iframe(iframe):
+                    if clicked and not self.click_outof_iframe():
                         self.try_iframes()
                     time.sleep(2)
                 if clicked and self.play_if_found():
@@ -133,11 +136,10 @@ class BaseSniffer:
             except:
                 self.driver.switch_to.default_content()
         return False
-    def click_outof_iframe(self,iframe):
+    def click_outof_iframe(self):
         if not self.play_class: return False
         self.driver.switch_to.default_content()
         clicked = self.click_play_button()
         time.sleep(2)
         self.play_if_found()
-        self.driver.switch_to.frame(iframe)
         return clicked

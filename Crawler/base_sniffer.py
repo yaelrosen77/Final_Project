@@ -36,6 +36,12 @@ class BaseSniffer:
     def setup_website(self):
         print(f"[⚙️] Opening: {self.url}")
         self.driver.get(self.url)
+        # try:
+        #     from selenium.webdriver.common.action_chains import ActionChains
+        #     ActionChains(self.driver).send_keys("thisisunsafe").perform()
+        #     print("⚠️ Bypassed SSL warning screen with 'thisisunsafe'")
+        # except Exception as e:
+        #     print(f"❌ SSL bypass failed or not needed: {e}")
         try:
             time.sleep(2)
             self.driver.execute_script("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
@@ -68,10 +74,10 @@ class BaseSniffer:
                     return false;
                 """, host, shadowRootElem)
                 if clicked:
-                    print("✅ Clicked 'Accept all' inside <page-footer>'s shadow DOM")
+                    print(f"✅ Clicked '{shadowRootElem}' inside <page-footer>'s shadow DOM")
                     return
                 else:
-                    print("❌ Could not find 'Accept all' button inside shadow DOM")
+                    print(f"❌ Could not find '{shadowRootElem}' button inside shadow DOM")
         except Exception as e:
             print("No page-footer's shadow DOM found")
 

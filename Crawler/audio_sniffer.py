@@ -40,13 +40,16 @@ class AudioSniffer(BaseSniffer):
         self.setup_driver()
         try:
             self.setup_website()
-            clicked = True
             self.FooterAcceptCookie(self.skip_class)
-            if self.play_class:
-                clicked = self.click_play_button()
+            clicked = self.click_play_button()
             time.sleep(5)
-            if isinstance(clicked,WebElement): self.driver.execute_script("arguments[0].play();", clicked)
-            if clicked: self.play_if_found()
+            if isinstance(clicked,WebElement):
+                print("running <audio> play")
+                self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", clicked)
+                clicked.click()
+                self.driver.execute_script("arguments[0].muted = false; return arguments[0].play();", clicked)
+                self.play_if_found()
+            elif not self.play_class: self.play_if_found()
             else: self.try_iframes()
         except Exception as e:
             print(f"[⚠️] General error: {e}")
@@ -55,7 +58,7 @@ class AudioSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_audios():
-    links = load_links_from_excel("Audio Str.")[59:]
+    links = load_links_from_excel("Audio Str.")[30:] #[59:]
     for url, play_class, skip_class in links:
         sniffer = AudioSniffer(url, play_class, skip_class)
         sniffer.sniff()

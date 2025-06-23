@@ -36,17 +36,17 @@ class BaseSniffer:
     def setup_website(self):
         print(f"[⚙️] Opening: {self.url}")
         self.driver.get(self.url)
-        # try:
-        #     from selenium.webdriver.common.action_chains import ActionChains
-        #     ActionChains(self.driver).send_keys("thisisunsafe").perform()
-        #     print("⚠️ Bypassed SSL warning screen with 'thisisunsafe'")
-        # except Exception as e:
-        #     print(f"❌ SSL bypass failed or not needed: {e}")
+        try:
+            from selenium.webdriver.common.action_chains import ActionChains
+            ActionChains(self.driver).send_keys("thisisunsafe").perform()
+            print("⚠️ Bypassed SSL warning screen with 'thisisunsafe'")
+        except Exception as e:
+            print(f"❌ SSL bypass failed or not needed: {e}")
         try:
             time.sleep(2)
-            self.driver.execute_script("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
+            self.driver.execute_script("(document.scrollingElement || document.documentElement).scrollTo({top: 99999, behavior: 'smooth'});")
             time.sleep(2)
-            self.driver.execute_script("window.scrollTo({ top: 0, behavior: 'smooth' });")
+            self.driver.execute_script("(document.scrollingElement || document.documentElement).scrollTo({ top: 0, behavior: 'smooth' });")
             time.sleep(2)
         except Exception as e:
             print(f"[⚠️] Scroll error: {e}")
@@ -84,6 +84,7 @@ class BaseSniffer:
     def play_if_found(self): pass
 
     def click_play_button(self, tries=0):
+        if not self.play_class: return True
         time.sleep(2)
         groups = [name.strip() for name in self.play_class.split(",") if name.strip()]
         selectors = [By.ID, By.CLASS_NAME]
@@ -104,7 +105,7 @@ class BaseSniffer:
                             print(f"[+] Clicked element with '{name}'")
                             self.play_class = ",".join([c for c in self.play_class.split(",") if c.strip() != name])
                             nameDone[i] = True
-                            time.sleep(1)
+                            time.sleep(1.5)
                             break
                         except: continue
                 except Exception as e:
@@ -129,12 +130,10 @@ class BaseSniffer:
             try:
                 self.driver.switch_to.frame(iframe)
                 time.sleep(2)
-                clicked = True
-                if self.play_class:
-                    clicked = self.click_play_button()
-                    if clicked and not self.click_outof_iframe():
-                        self.try_iframes()
-                    time.sleep(2)
+                clicked = self.click_play_button()
+                if clicked and not self.click_outof_iframe():
+                    self.try_iframes()
+                time.sleep(2)
                 if clicked and self.play_if_found():
                     self.driver.switch_to.default_content()
                     return True
@@ -143,7 +142,7 @@ class BaseSniffer:
                 self.driver.switch_to.default_content()
         return False
     def click_outof_iframe(self):
-        if not self.play_class: return False
+        if not self.play_class: return True
         self.driver.switch_to.default_content()
         clicked = self.click_play_button()
         time.sleep(2)

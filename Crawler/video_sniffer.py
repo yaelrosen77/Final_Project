@@ -43,10 +43,8 @@ class VideoSniffer(BaseSniffer):
         self.setup_driver()
         try:
             self.setup_website()
-            clicked = True
             self.FooterAcceptCookie(self.skip_class)
-            if self.play_class:
-                clicked = self.click_play_button()
+            clicked = self.click_play_button()
             time.sleep(5)
             played = self.play_if_found()
             if not clicked or not played:
@@ -59,7 +57,7 @@ class VideoSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")[64:] # [64:]
+    links = load_links_from_excel("Video Str.")[0:] # [64:]
     for url, play_class, skip_class in links:
         sniffer = VideoSniffer(url, play_class, skip_class)
         sniffer.sniff()

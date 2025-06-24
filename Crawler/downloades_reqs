@@ -2,7 +2,7 @@ EXCEL MARKS
 Blue = requires registration
 Red = not under clickable class
 Green = verified
-Purple = failed on non-bots verification
+Purple = failed on non-bots verification or cookies
 Orange = Doesnt include download links or doesnt even opens- replace or add some upload
 Yellow = manually can be download but in chromium just opens or there are several links and it marks the first one
 Pink = clickable class is under drop-down or other pop-up window
@@ -11,7 +11,12 @@ Pink = clickable class is under drop-down or other pop-up window
 Todo:
 cancel pre-class col inside the code and the file
 check out if there is a class attribute in red
-see whether delaying download by second will help (yellow case)
+see whether delaying download by second will help (yellow case) or check if is the right link
 for links of type upload can upload and download the same file
 for links that are under drop down check if they change URL
 add some manually popular links pcaps
+check wheter we can download by content inside the href and place it in the excel
+registration under google account- add in code logic
+for the pink case add some more clicks for it
+for classes with multiple words-> just add dots between each word like in line 111
+add ten more links and all exterior links that work 

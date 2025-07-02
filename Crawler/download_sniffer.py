@@ -34,7 +34,7 @@ def sniff_file_download(url, play_class="", pre_class=""):
         # Get list of files BEFORE clicking
         existing_files = set(os.listdir(out_dir))
 
-        page.goto(url, timeout=60000, wait_until="domcontentloaded")
+        page.goto(url, timeout=70000, wait_until="domcontentloaded")
         triggered = False
 
         def try_click(selector, label):
@@ -79,14 +79,14 @@ def sniff_file_download(url, play_class="", pre_class=""):
                 print(f"[✅] File detected in folder: {file}")
         else:
             print("[❌] No file was downloaded or detected in folder.")
-
+        time.sleep(5)
         browser.close()
 
     tshark_proc.wait()
     print(f"✅ Sniffing complete: {pcap_file}")
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[152:]
+    links = load_links_from_excel("Download")[95:]
     for url, play_class, pre_class in links:
         sniff_file_download(url, play_class, pre_class)
 

@@ -127,19 +127,7 @@ class BaseSniffer:
         self.driver.switch_to.default_content()
         iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
         for iframe in iframes:
-            try:
-                self.driver.switch_to.frame(iframe)
-                time.sleep(2)
-                clicked = self.click_play_button()
-                if clicked and not self.click_outof_iframe():
-                    self.try_iframes()
-                time.sleep(2)
-                if clicked and self.play_if_found():
-                    self.driver.switch_to.default_content()
-                    return True
-                self.driver.switch_to.default_content()
-            except:
-                self.driver.switch_to.default_content()
+            if self.handle_iframe(iframe): return True
         return False
     def click_outof_iframe(self):
         if not self.play_class: return True
@@ -148,3 +136,31 @@ class BaseSniffer:
         time.sleep(2)
         self.play_if_found()
         return clicked
+
+    def try_iframes_in_iframe(self):
+        print(f"[🎬] Trying iframe in iframe...")
+        iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+        for iframe in iframes:
+            try:
+                self.driver.switch_to.frame(iframe)
+                time.sleep(2)
+                self.driver.switch_to.default_content()
+            except:
+                self.driver.switch_to.default_content()
+        return False
+
+    def handle_iframe(self, iframe):
+        try:
+            self.driver.switch_to.frame(iframe)
+            time.sleep(2)
+            clicked = self.click_play_button()
+            if clicked and not self.click_outof_iframe():
+                self.try_iframes()
+            time.sleep(2)
+            if clicked and self.play_if_found():
+                self.driver.switch_to.default_content()
+                return True
+            self.driver.switch_to.default_content()
+        except:
+            self.driver.switch_to.default_content()
+        return False

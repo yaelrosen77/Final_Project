@@ -8,7 +8,7 @@ from excel_loader import load_links_from_excel
 from base_sniffer import BaseSniffer
 from selenium.webdriver.remote.webelement import WebElement
 
-wait_time = 3
+wait_time = 1
 
 import time
 import pyautogui
@@ -58,7 +58,7 @@ class AudioSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_audios():
-    links = load_links_from_excel("Audio Str.")[70:]
+    links = load_links_from_excel("Audio Str.")[49:] #[70:]
     for url, play_class, skip_class in links:
         sniffer = AudioSniffer(url, play_class, skip_class)
         sniffer.sniff()

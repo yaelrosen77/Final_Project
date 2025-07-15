@@ -139,14 +139,13 @@ class BaseSniffer:
 
     def try_iframes_in_iframe(self):
         print(f"[🎬] Trying iframe in iframe...")
+        self.driver.switch_to.default_content()
         iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
         for iframe in iframes:
-            try:
-                self.driver.switch_to.frame(iframe)
-                time.sleep(2)
-                self.driver.switch_to.default_content()
-            except:
-                self.driver.switch_to.default_content()
+            self.driver.switch_to.frame(iframe)
+            iframes2 = self.driver.find_elements(By.TAG_NAME, "iframe")
+            for iframe2 in iframes2:
+                if self.handle_iframe(iframe2): return True
         return False
 
     def handle_iframe(self, iframe):

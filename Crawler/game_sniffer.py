@@ -57,6 +57,9 @@ class GameSniffer(BaseSniffer):
             self.driver.quit()
             print(f"[✅] capture done: {self.pcap_file}")
 
+    def after_click(self, name):
+        super().after_click(name)
+        self.fill_nickname_field()
     def fill_nickname_field(self, value="sinale"):
         print("🔍 Searching for name/nickname/displayname input field...")
         inputs = self.driver.find_elements(By.TAG_NAME, "input")
@@ -80,7 +83,7 @@ class GameSniffer(BaseSniffer):
         return False
 
 def sniff_all_games():
-    links = load_links_from_excel("Games")[10:]  # [9:]
+    links = load_links_from_excel("Games")[11:]  # [9:]
     for url, play_class, skip_class in links:
         sniffer = GameSniffer(url, play_class, skip_class)
         sniffer.sniff()

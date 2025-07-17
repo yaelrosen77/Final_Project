@@ -103,7 +103,7 @@ class BaseSniffer:
                             if element.tag_name.lower() == "audio": return element
                             element.click()
                             print(f"[+] Clicked element with '{name}'")
-                            self.play_class = ",".join([c for c in self.play_class.split(",") if c.strip() != name])
+                            self.after_click(name)
                             nameDone[i] = True
                             time.sleep(1.5)
                             break
@@ -121,6 +121,8 @@ class BaseSniffer:
         for curNameDone in nameDone:
             if curNameDone: return True
         return False
+    def after_click(self, name):
+        self.play_class = ",".join([c for c in self.play_class.split(",") if c.strip() != name])
 
     def try_iframes(self):
         print(f"[🎬] Trying iframe...")

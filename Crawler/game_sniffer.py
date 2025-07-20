@@ -11,9 +11,10 @@ from selenium.webdriver.common.keys import Keys
 
 wait_time = 5
 
+
 class GameSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
-        super().__init__(url, play_class, skip_class,"audio")
+        super().__init__(url, play_class, skip_class, "audio")
 
     def play_if_found(self):
         try:
@@ -47,10 +48,11 @@ class GameSniffer(BaseSniffer):
                     print("⚠️ Failed to send ENTER:", e)
             clicked = self.click_play_button()
             time.sleep(5)
-            if not self.play_class: self.play_if_found()
+            if not self.play_class:
+                self.play_if_found()
             else:
-                if not self.try_iframes():
-                    self.try_iframes_in_iframe()
+                self.try_iframes()
+            if self.play_class: self.try_iframes_in_iframe()
         except Exception as e:
             print(f"[⚠️] General error: {e}")
         finally:
@@ -60,8 +62,8 @@ class GameSniffer(BaseSniffer):
     def after_click(self, name):
         super().after_click(name)
         self.fill_nickname_field()
+
     def fill_nickname_field(self, value="sinale"):
-        print("🔍 Searching for name/nickname/displayname input field...")
         inputs = self.driver.find_elements(By.TAG_NAME, "input")
         keywords = ["name", "nickname", "displayname"]
         for input_el in inputs:
@@ -82,11 +84,13 @@ class GameSniffer(BaseSniffer):
         print("❌ No matching input field found for name/nickname/displayname.")
         return False
 
+
 def sniff_all_games():
-    links = load_links_from_excel("Games")[11:]  # [9:]
+    links = load_links_from_excel("Games")[12:]  # [11:]
     for url, play_class, skip_class in links:
         sniffer = GameSniffer(url, play_class, skip_class)
         sniffer.sniff()
+
 
 if __name__ == "__main__":
     sniff_all_games()

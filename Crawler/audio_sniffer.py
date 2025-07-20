@@ -40,7 +40,7 @@ class AudioSniffer(BaseSniffer):
         self.setup_driver()
         try:
             self.setup_website()
-            self.FooterAcceptCookie(self.skip_class)
+            self.click_shadow_button()
             clicked = self.click_play_button()
             time.sleep(5)
             if isinstance(clicked,WebElement):

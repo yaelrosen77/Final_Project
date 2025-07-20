@@ -38,6 +38,7 @@ class GameSniffer(BaseSniffer):
         self.setup_driver()
         try:
             self.setup_website()
+            self.click_shadow_button()
             self.fill_nickname_field()
             if not self.play_class:
                 try:
@@ -61,6 +62,7 @@ class GameSniffer(BaseSniffer):
 
     def after_click(self, name):
         super().after_click(name)
+        self.click_shadow_button_everywhere()
         self.fill_nickname_field()
 
     def fill_nickname_field(self, value="sinale"):
@@ -83,14 +85,29 @@ class GameSniffer(BaseSniffer):
                 continue
         print("❌ No matching input field found for name/nickname/displayname.")
         return False
-
+    def click_shadow_button_everywhere(self, max_depth=5, depth=0):
+        try:
+            self.driver.switch_to.default_content()
+            self.click_shadow_button()
+            iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+            for iframe in iframes:
+                try:
+                    self.driver.switch_to.frame(iframe)
+                    self.click_shadow_button()
+                    if depth < max_depth:
+                        self.click_shadow_button_everywhere(max_depth, depth + 1)
+                    self.driver.switch_to.default_content()
+                except:
+                    self.driver.switch_to.default_content()
+                    continue
+        except Exception as e:
+            print(f"[⚠️] Error in shadow button search: {e}")
 
 def sniff_all_games():
-    links = load_links_from_excel("Games")[12:]  # [11:]
+    links = load_links_from_excel("Games")[11:]  # [11:]
     for url, play_class, skip_class in links:
         sniffer = GameSniffer(url, play_class, skip_class)
         sniffer.sniff()
-
 
 if __name__ == "__main__":
     sniff_all_games()

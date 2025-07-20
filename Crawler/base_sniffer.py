@@ -56,7 +56,8 @@ class BaseSniffer:
         except Exception as e:
             print(f"[⚠️] Scroll error: {e}")
 
-    def FooterAcceptCookie(self, shadowRootElem):
+    def click_shadow_button(self):
+        if not self.skip_class: return
         try:
             shadow_hosts = self.driver.execute_script("""
                 return Array.from(document.querySelectorAll("*"))
@@ -77,12 +78,13 @@ class BaseSniffer:
                         return true;
                     }
                     return false;
-                """, host, shadowRootElem)
+                """, host, self.skip_class)
                 if clicked:
-                    print(f"✅ Clicked '{shadowRootElem}' inside <page-footer>'s shadow DOM")
+                    self.skip_class = ""
+                    print(f"✅ Clicked '{self.skip_class}' inside shadow DOM")
                     return
                 else:
-                    print(f"❌ Could not find '{shadowRootElem}' button inside shadow DOM")
+                    print(f"❌ Could not find '{self.skip_class}' button inside shadow DOM")
         except Exception as e:
             print("No page-footer's shadow DOM found")
 

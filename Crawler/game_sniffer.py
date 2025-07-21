@@ -15,6 +15,7 @@ wait_time = 5
 class GameSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
         super().__init__(url, play_class, skip_class, "audio")
+        self.nicknamed_filled = False
 
     def play_if_found(self):
         try:
@@ -34,25 +35,16 @@ class GameSniffer(BaseSniffer):
 
     def sniff(self):
         self.ensure_dir()
-        print(f"\n🟢 Starting capture for {self.app_name}...")
         self.setup_driver()
         try:
             self.setup_website()
             self.click_shadow_button()
             self.fill_nickname_field()
-            if not self.play_class:
-                try:
-                    focused = self.driver.switch_to.active_element
-                    focused.send_keys(Keys.ENTER)
-                    print("🔄 Sent ENTER to focused input")
-                except Exception as e:
-                    print("⚠️ Failed to send ENTER:", e)
+            self.enter_focused()
             clicked = self.click_play_button()
             time.sleep(5)
-            if not self.play_class:
-                self.play_if_found()
-            else:
-                self.try_iframes()
+            if not self.play_class: self.play_if_found()
+            else: self.try_iframes()
             if self.play_class: self.try_iframes_in_iframe()
         except Exception as e:
             print(f"[⚠️] General error: {e}")
@@ -65,7 +57,18 @@ class GameSniffer(BaseSniffer):
         self.click_shadow_button_everywhere()
         self.fill_nickname_field()
 
+    def enter_focused(self):
+        if not self.play_class:
+            print("################# enter_focused ################  ", end='')
+            try:
+                focused = self.driver.switch_to.active_element
+                focused.send_keys(Keys.ENTER)
+                print("✅")
+            except Exception as e:
+                print("❌:", e)
     def fill_nickname_field(self, value="sinale"):
+        if self.nicknamed_filled: return
+        print("############ fill_nickname_field ###########  ", end='')
         inputs = self.driver.find_elements(By.TAG_NAME, "input")
         keywords = ["name", "nickname", "displayname"]
         for input_el in inputs:
@@ -79,15 +82,17 @@ class GameSniffer(BaseSniffer):
                     if any(k in attr_value.lower() for k in keywords):
                         input_el.clear()
                         input_el.send_keys(value)
-                        print(f"✅ Filled input [{attr_value}] with '{value}'")
-                        return True
-            except Exception as e:
-                continue
-        print("❌ No matching input field found for name/nickname/displayname.")
+                        print(f"✅")
+                        self.nicknamed_filled = True
+                        return
+            except Exception as e: continue
+        print("❌")
         return False
     def click_shadow_button_everywhere(self, max_depth=5, depth=0):
+        if not self.skip_class: return
+        print("############# shadow_button_everywhere #############  ", end='')
         try:
-            self.driver.switch_to.default_content()
+            if depth == 0: self.driver.switch_to.default_content()
             self.click_shadow_button()
             iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
             for iframe in iframes:
@@ -100,8 +105,7 @@ class GameSniffer(BaseSniffer):
                 except:
                     self.driver.switch_to.default_content()
                     continue
-        except Exception as e:
-            print(f"[⚠️] Error in shadow button search: {e}")
+        except Exception as e: print("❌")
 
 def sniff_all_games():
     links = load_links_from_excel("Games")[11:]  # [11:]

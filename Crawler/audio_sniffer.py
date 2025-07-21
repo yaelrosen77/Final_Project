@@ -36,7 +36,6 @@ class AudioSniffer(BaseSniffer):
 
     def sniff(self):
         self.ensure_dir()
-        print(f"\n🟢 Starting capture for {self.app_name}...")
         self.setup_driver()
         try:
             self.setup_website()

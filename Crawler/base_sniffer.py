@@ -36,10 +36,9 @@ class BaseSniffer:
         self.driver = uc.Chrome(options=options)
         try:
             version = self.driver.capabilities.get("browserVersion")
-            print(f"[🧠] Chrome version detected: {version}")
         except: pass
     def setup_website(self):
-        print(f"[⚙️] Opening: {self.url}")
+        print(f"\n🟢 Starting capture for {self.app_name} with: {self.url}")
         self.driver.get(self.url)
         try:
             from selenium.webdriver.common.action_chains import ActionChains
@@ -58,11 +57,13 @@ class BaseSniffer:
 
     def click_shadow_button(self):
         if not self.skip_class: return
+        print("############### shadow_button ##############  ", end='')
         try:
             shadow_hosts = self.driver.execute_script("""
                 return Array.from(document.querySelectorAll("*"))
                     .filter(el => el.shadowRoot !== null);
             """)
+            if not shadow_hosts: print(f"❌ - No shadow_hosts")
             for host in shadow_hosts:
                 clicked = self.driver.execute_script("""
                     const footer = arguments[0];
@@ -81,17 +82,17 @@ class BaseSniffer:
                 """, host, self.skip_class)
                 if clicked:
                     self.skip_class = ""
-                    print(f"✅ Clicked '{self.skip_class}' inside shadow DOM")
+                    print(f"✅ - Clicked '{self.skip_class}'")
                     return
                 else:
-                    print(f"❌ Could not find '{self.skip_class}' button inside shadow DOM")
-        except Exception as e:
-            print("No page-footer's shadow DOM found")
+                    print(f"❌ - Couldn't find '{self.skip_class}'")
+        except Exception as e: print("❌ - No shadow DOM found")
 
     def play_if_found(self): pass
 
     def click_play_button(self, tries=0):
         if not self.play_class: return True
+        print("############# click_play_button ############  ", end='')
         time.sleep(2)
         groups = [name.strip() for name in self.play_class.split(",") if name.strip()]
         selectors = [By.ID, By.CLASS_NAME]
@@ -109,20 +110,19 @@ class BaseSniffer:
                             time.sleep(0.5)
                             if element.tag_name.lower() == "audio": return element
                             element.click()
-                            print(f"[+] Clicked element with '{name}'")
+                            print(f"✅ - Clicked '{name}'")
                             self.after_click(name)
                             nameDone[i] = True
                             time.sleep(1.5)
                             break
                         except: continue
                 except Exception as e:
-                    print(f"[!] Failed to click element with {name}")
+                    print(f"❌ - Couln't find {name}")
                     continue
                 if nameDone[i]: break
         if notFoundSoUnloaded:
-            print(f"[⚠️] Unloaded '{self.play_class}'")
             if tries > 2:
-                print(f"[⚠️] Failed to load '{self.play_class}'")
+                print(f"❌ - Unloaded '{self.play_class}'")
                 return False
             self.click_play_button(tries)
         for curNameDone in nameDone:
@@ -132,7 +132,7 @@ class BaseSniffer:
         self.play_class = ",".join([c for c in self.play_class.split(",") if c.strip() != name])
 
     def try_iframes(self):
-        print(f"[🎬] Trying iframe...")
+        print(f"################## iframe ##################  ", end='')
         self.driver.switch_to.default_content()
         iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
         for iframe in iframes:
@@ -147,7 +147,7 @@ class BaseSniffer:
         return clicked
 
     def try_iframes_in_iframe(self):
-        print(f"[🎬] Trying iframe in iframe...")
+        print(f"############# iframe in iframe #############  ", end='')
         self.driver.switch_to.default_content()
         iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
         for iframe in iframes:

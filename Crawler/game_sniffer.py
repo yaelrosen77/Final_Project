@@ -44,8 +44,11 @@ class GameSniffer(BaseSniffer):
             clicked = self.click_play_button()
             time.sleep(5)
             if not self.play_class: self.play_if_found()
-            else: self.try_iframes()
-            if self.play_class: self.try_iframes_in_iframe()
+            else: self.try_iframes_in_iframe()
+            if self.play_class: self.try_iframes()
+            if self.play_class:
+                print(f"⚠️⚠️⚠️⚠️ didn't click {self.play_class} ⚠️⚠️⚠️⚠️")
+                self.play_if_found()
         except Exception as e:
             print(f"[⚠️] General error: {e}")
         finally:
@@ -54,7 +57,6 @@ class GameSniffer(BaseSniffer):
 
     def after_click(self, name):
         super().after_click(name)
-        self.click_shadow_button_everywhere()
         self.fill_nickname_field()
 
     def enter_focused(self):
@@ -88,27 +90,9 @@ class GameSniffer(BaseSniffer):
             except Exception as e: continue
         print("❌")
         return False
-    def click_shadow_button_everywhere(self, max_depth=5, depth=0):
-        if not self.skip_class: return
-        print("############# shadow_button_everywhere #############  ", end='')
-        try:
-            if depth == 0: self.driver.switch_to.default_content()
-            self.click_shadow_button()
-            iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
-            for iframe in iframes:
-                try:
-                    self.driver.switch_to.frame(iframe)
-                    self.click_shadow_button()
-                    if depth < max_depth:
-                        self.click_shadow_button_everywhere(max_depth, depth + 1)
-                    self.driver.switch_to.default_content()
-                except:
-                    self.driver.switch_to.default_content()
-                    continue
-        except Exception as e: print("❌")
 
 def sniff_all_games():
-    links = load_links_from_excel("Games")[11:]  # [11:]
+    links = load_links_from_excel("Games")[30:]
     for url, play_class, skip_class in links:
         sniffer = GameSniffer(url, play_class, skip_class)
         sniffer.sniff()

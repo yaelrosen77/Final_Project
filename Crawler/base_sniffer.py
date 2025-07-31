@@ -30,7 +30,6 @@ class BaseSniffer:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
-        options.add_argument("--window-size=1920,1080")
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
         self.driver = uc.Chrome(options=options)
@@ -56,7 +55,7 @@ class BaseSniffer:
             print(f"[⚠️] Scroll error: {e}")
 
     def click_shadow_button(self):
-        if not self.skip_class: return
+        if not self.skip_class or isinstance(self.skip_class,int): return
         print("############### shadow_button ##############  ", end='')
         try:
             shadow_hosts = self.driver.execute_script("""
@@ -113,7 +112,7 @@ class BaseSniffer:
                             print(f"✅ - Clicked '{name}'")
                             self.after_click(name)
                             nameDone[i] = True
-                            time.sleep(1.5)
+                            time.sleep(3)
                             break
                         except: continue
                 except Exception as e:

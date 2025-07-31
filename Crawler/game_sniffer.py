@@ -21,6 +21,7 @@ class GameSniffer(BaseSniffer):
         try:
             time.sleep(5)
             print(f"[🎬] Playing <audio> for {wait_time} seconds...")
+            if self.skip_class and isinstance(self.skip_class,int): time.sleep(self.skip_class)
             tshark_proc = subprocess.Popen(
                 ["tshark", "-i", "eth0", "-a", f"duration:{wait_time}", "-w", self.pcap_file],
                 stdout=subprocess.DEVNULL,
@@ -44,8 +45,8 @@ class GameSniffer(BaseSniffer):
             clicked = self.click_play_button()
             time.sleep(5)
             if not self.play_class: self.play_if_found()
-            else: self.try_iframes_in_iframe()
-            if self.play_class: self.try_iframes()
+            else: self.try_iframes()
+            # if self.play_class: self.try_iframes_in_iframe()
             if self.play_class:
                 print(f"⚠️⚠️⚠️⚠️ didn't click {self.play_class} ⚠️⚠️⚠️⚠️")
                 self.play_if_found()
@@ -92,7 +93,7 @@ class GameSniffer(BaseSniffer):
         return False
 
 def sniff_all_games():
-    links = load_links_from_excel("Games")[30:]
+    links = load_links_from_excel("Games")[34:]
     for url, play_class, skip_class in links:
         sniffer = GameSniffer(url, play_class, skip_class)
         sniffer.sniff()

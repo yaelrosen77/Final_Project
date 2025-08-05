@@ -7,7 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 from utils import get_app_name
 from excel_loader import load_links_from_excel
 from base_sniffer import BaseSniffer
-wait_time = 1
+wait_time = 2
 
 class VideoSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
@@ -56,7 +56,7 @@ class VideoSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")[24:] # [67:]
+    links = load_links_from_excel("Video Str.")#[67:]
     for url, play_class, skip_class in links:
         sniffer = VideoSniffer(url, play_class, skip_class)
         sniffer.sniff()

@@ -57,7 +57,7 @@ class AudioSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_audios():
-    links = load_links_from_excel("Audio Str.")[69:]  #[70:]
+    links = load_links_from_excel("Audio Str.")[73:]  #[70:]
     for url, play_class, skip_class in links:
         sniffer = AudioSniffer(url, play_class, skip_class)
         sniffer.sniff()

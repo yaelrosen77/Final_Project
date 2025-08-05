@@ -93,7 +93,7 @@ class GameSniffer(BaseSniffer):
         return False
 
 def sniff_all_games():
-    links = load_links_from_excel("Games")[30:]
+    links = load_links_from_excel("Games")#[30:]
     for url, play_class, skip_class in links:
         sniffer = GameSniffer(url, play_class, skip_class)
         sniffer.sniff()

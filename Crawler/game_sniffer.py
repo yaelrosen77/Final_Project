@@ -46,7 +46,7 @@ class GameSniffer(BaseSniffer):
             time.sleep(5)
             if not self.play_class: self.play_if_found()
             else: self.try_iframes()
-            # if self.play_class: self.try_iframes_in_iframe()
+            if self.play_class: self.try_iframes_in_iframe()
             if self.play_class:
                 print(f"⚠️⚠️⚠️⚠️ didn't click {self.play_class} ⚠️⚠️⚠️⚠️")
                 self.play_if_found()
@@ -93,7 +93,7 @@ class GameSniffer(BaseSniffer):
         return False
 
 def sniff_all_games():
-    links = load_links_from_excel("Games")[42:]
+    links = load_links_from_excel("Games")[30:]
     for url, play_class, skip_class in links:
         sniffer = GameSniffer(url, play_class, skip_class)
         sniffer.sniff()

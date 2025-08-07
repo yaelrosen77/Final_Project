@@ -1,12 +1,8 @@
 import time
-import os
 import subprocess
-import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-from utils import get_app_name
-from excel_loader import load_links_from_excel
-from base_sniffer import BaseSniffer
+from base_sniffer import BaseSniffer, load_links_from_excel
 wait_time = 2
 
 class VideoSniffer(BaseSniffer):

@@ -2,8 +2,7 @@ import time
 import os
 import subprocess
 from playwright.sync_api import sync_playwright
-from utils import get_app_name
-from excel_loader import load_links_from_excel
+from base_sniffer import BaseSniffer, get_app_name, load_links_from_excel
 
 def ensure_dir(path):
     if not os.path.exists(path):

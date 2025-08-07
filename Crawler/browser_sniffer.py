@@ -1,10 +1,7 @@
 import time
-import os
 import subprocess
 from playwright.sync_api import sync_playwright
-from utils import get_app_name
-from excel_loader import load_links_from_excel
-from base_sniffer import BaseSniffer
+from base_sniffer import BaseSniffer, load_links_from_excel
 
 class BrowserSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
@@ -21,7 +18,7 @@ class BrowserSniffer(BaseSniffer):
         )
         time.sleep(1)
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=False)  # Set to False to see what happens
+            browser = p.chromium.launch(headless=False)  # Set to "False" to see what happens
             context = browser.new_context()
             page = context.new_page()
             try:

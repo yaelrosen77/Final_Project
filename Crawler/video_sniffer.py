@@ -56,7 +56,7 @@ class VideoSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_videos():
-    links = load_links_from_excel("Video Str.")#[67:]
+    links = load_links_from_excel("Video Str.")[100:]
     for url, play_class, skip_class in links:
         sniffer = VideoSniffer(url, play_class, skip_class)
         sniffer.sniff()

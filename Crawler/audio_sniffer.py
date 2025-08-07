@@ -1,7 +1,4 @@
-import time
-import os
 import subprocess
-import undetected_chromedriver as uc
 from selenium.common.exceptions import NoSuchElementException
 from base_sniffer import BaseSniffer, load_links_from_excel
 from selenium.webdriver.remote.webelement import WebElement
@@ -9,8 +6,6 @@ from selenium.webdriver.remote.webelement import WebElement
 wait_time = 5
 
 import time
-import pyautogui
-from selenium.webdriver.common.by import By
 
 class AudioSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):

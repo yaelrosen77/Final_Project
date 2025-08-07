@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# 🧱 התקנת תלויות מערכת
+# התקנת תלויות מערכת
 RUN apt-get update && apt-get install -y \
     wget curl gnupg unzip sudo \
     tshark \
@@ -10,13 +10,19 @@ RUN apt-get update && apt-get install -y \
     chromium \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 📂 תיקיית עבודה
+# 🧩 תיקון כדי ש-uc ימצא את הדפדפן
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && apt-get install -y google-chrome-stable
+
+
+# תיקיית עבודה
 WORKDIR /app
 
-# 📝 העתקת הקבצים
+# העתקת הקבצים
 COPY . .
 
-# 📦 התקנת תלויות פייתון
+# התקנת תלויות פייתון
 RUN pip install --no-cache-dir \
     pandas \
     openpyxl \
@@ -25,14 +31,14 @@ RUN pip install --no-cache-dir \
     undetected-chromedriver==3.5.4 \
     playwright
 
-# 🧩 התקנת דפדפנים ל-Playwright
+# התקנת דפדפנים ל-playwright
 RUN playwright install --with-deps
 
-# 🎯 הרשאות ל-tshark להרצה מתוך הדוקר
+# הרשאות tshark
 RUN adduser --disabled-password --gecos '' tshark && \
     chgrp tshark /usr/bin/dumpcap && \
     chmod 750 /usr/bin/dumpcap && \
     setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 
-# 🏁 ברירת מחדל: הרץ את הסניפר הראשי
+# ברירת מחדל
 CMD ["python", "ApplicationRunner.py"]

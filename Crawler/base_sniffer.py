@@ -55,8 +55,7 @@ class BaseSniffer:
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
         self.driver = uc.Chrome(options=options)
-        try:
-            version = self.driver.capabilities.get("browserVersion")
+        try: version = self.driver.capabilities.get("browserVersion")
         except: pass
     def setup_website(self):
         print(f"\n🟢 Starting capture for {self.app_name} with: {self.url}")

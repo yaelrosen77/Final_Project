@@ -5,7 +5,7 @@ from base_sniffer import BaseSniffer, load_links_from_excel
 
 class BrowserSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
-        super().__init__(url, play_class, skip_class,"video")
+        super().__init__(url, play_class, skip_class,"Browser")
 
     def sniff(self):
         self.ensure_dir()

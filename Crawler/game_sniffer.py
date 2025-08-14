@@ -2,6 +2,7 @@ import time
 import subprocess
 from selenium.common.exceptions import NoSuchElementException
 from base_sniffer import BaseSniffer, load_links_from_excel
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 wait_time = 5
@@ -9,7 +10,7 @@ wait_time = 5
 
 class GameSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
-        super().__init__(url, play_class, skip_class, "audio")
+        super().__init__(url, play_class, skip_class, "Game")
         self.nicknamed_filled = False
 
     def play_if_found(self):

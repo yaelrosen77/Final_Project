@@ -2,84 +2,52 @@ import time
 import os
 import subprocess
 from playwright.sync_api import sync_playwright
-from base_sniffer import BaseSniffer, get_app_name, load_links_from_excel
+from base_sniffer import BaseSniffer, load_links_from_excel
 
-def ensure_dir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+wait_time = 5
 
-def sniff_file_download(url, play_class="", pre_class=""):
-    app_name = get_app_name(url)
-    out_dir = f"/app/download"
-    ensure_dir(out_dir)
-    pcap_file = f"{out_dir}/{app_name}_download.pcap"
+class DownloadSniffer(BaseSniffer):
+    def __init__(self, url, play_class="", skip_class=""):
+        super().__init__(url, play_class, skip_class,"Download")
 
-    print(f"\n🟢 Starting download capture for {app_name}...")
-
-    # Start tshark
-    tshark_proc = subprocess.Popen(
-        ["tshark", "-i", "eth0", "-a", "duration:40", "-w", pcap_file],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-
-    time.sleep(1)
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
-        page = context.new_page()
-        page.goto(url, timeout=60000, wait_until="domcontentloaded")
-
-        triggered = False
-        previous_url = page.url
-
-        def try_click(selector, label):
-            nonlocal triggered
-            try:
-                page.wait_for_selector(selector, timeout=5000)
-                page.click(selector)
-                print(f"[🖱️] Clicked with selector ({label}): {selector}")
-                triggered = True
-            except Exception as e:
-                print(f"[⚠️] {label} selector failed: {e}")
-
-        # 1. Click by class name
-        if play_class and not triggered:
-            try_click(play_class, "class")
-
-        # 2. Default selector
-        if not triggered:
-            try_click('a[href$=".pdf"], a[download], button:has-text("Download")', "Default")
-
-        # 3. Fallback by class or id
-        if not triggered:
-            try_click('[class*="download" i], [id*="download" i]', "Fallback")
-
-        time.sleep(2)  # זמן לדף לטעון מחדש או להחליף כתובת
-        current_url = page.url
-
-        if current_url != previous_url and current_url.lower().endswith(".pdf"):
-            print(f"[🌍] Detected navigation to PDF: {current_url}")
-            response = context.request.get(current_url)
-            filename = os.path.basename(current_url).split("?")[0]
-            save_path = os.path.join(out_dir, filename)
-            with open(save_path, "wb") as f:
-                f.write(response.body())
-            print(f"[✅] PDF saved to: {save_path}")
-        else:
-            print("[❌] No PDF detected after interaction.")
-        time.sleep(6)
-
-        browser.close()
-    tshark_proc.wait()
-    print(f"✅ Sniffing complete: {pcap_file}")
-
+    def sniff(self):
+        self.ensure_dir()
+        self.setup_driver()
+        try:
+            self.setup_website()
+            tshark_proc = subprocess.Popen(
+                ["tshark", "-i", "eth0", "-a", "duration:40", "-w", self.pcap_file],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            time.sleep(1)
+            existing_files = set(os.listdir(self.out_dir))   # Get list of files BEFORE clicking
+            clicked = self.click_play_button()
+            if self.play_class: self.try_iframes_in_iframe()
+            if self.play_class: self.try_iframes()
+            # if not clicked:
+            #     try_click('a[href$=".pdf"], a[download], button:has-text("Download")', "Default")
+            # if not clicked:
+            #     try_click('[class*="download" i], [id*="download" i]', "Fallback")
+            print("⏳ Waiting for file to be written...")
+            time.sleep(wait_time)
+            new_files = set(os.listdir(self.out_dir)) - existing_files
+            if new_files:
+                for file in new_files: print(f"[✅] File detected in folder: {file}")
+            else: print("[❌] No file was downloaded or detected in folder.")
+            time.sleep(5)
+            tshark_proc.wait()
+        except Exception as e:
+            print(f"[⚠️] General error: {e}")
+        finally:
+            self.driver.quit()
+            print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[3:]
-    for url, play_class, pre_class in links:
-        sniff_file_download(url, play_class, pre_class)
+    links = load_links_from_excel("Download")[8:]
+    for url, play_class, skip_class in links:
+        sniffer = DownloadSniffer(url, play_class, skip_class)
+        sniffer.sniff()
 
 if __name__ == "__main__":
     sniff_all_downloads()

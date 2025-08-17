@@ -22,7 +22,7 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
         page = context.new_page()
 
         try:
-            page.goto(url, timeout=60000, wait_until="domcontentloaded")
+            page.goto(url, timeout=90000, wait_until="domcontentloaded")
 
             with open(html_file, "w", encoding="utf-8") as f:
                 f.write(page.content())
@@ -77,7 +77,7 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
     print(f"✅ Upload capture done: {pcap_file}")
 
 def sniff_all_cloud():
-    links = load_links_from_excel("Cloud")[3:]
+    links = load_links_from_excel("Cloud")[13:]
     for url, play_class, pre_class in links:
         sniff_cloud_upload(url, play_class, pre_class)
 

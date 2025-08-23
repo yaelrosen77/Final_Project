@@ -77,7 +77,7 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
     print(f"✅ Upload capture done: {pcap_file}")
 
 def sniff_all_cloud():
-    links = load_links_from_excel("Cloud")[45:]
+    links = load_links_from_excel("Cloud")[94:]
     for url, play_class, pre_class in links:
         sniff_cloud_upload(url, play_class, pre_class)
 

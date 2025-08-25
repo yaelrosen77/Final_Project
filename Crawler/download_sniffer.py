@@ -44,7 +44,7 @@ class DownloadSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[8:]
+    links = load_links_from_excel("Download")[16:]
     for url, play_class, skip_class in links:
         sniffer = DownloadSniffer(url, play_class, skip_class)
         sniffer.sniff()

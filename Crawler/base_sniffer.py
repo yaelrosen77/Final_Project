@@ -1,5 +1,6 @@
 import time
 import os
+import subprocess
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 import tldextract
@@ -74,6 +75,13 @@ class BaseSniffer:
             time.sleep(2)
         except Exception as e:
             print(f"[⚠️] Scroll error: {e}")
+    def start_pcap_sniffing(self):
+        tshark_proc = subprocess.Popen(
+            ["tshark", "-i", "eth0", "-a", "duration:40", "-w", self.pcap_file],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return tshark_proc
 
     def click_shadow_button(self):
         if not self.skip_class or isinstance(self.skip_class,int): return

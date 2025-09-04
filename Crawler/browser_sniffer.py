@@ -11,11 +11,7 @@ class BrowserSniffer(BaseSniffer):
         self.ensure_dir()
         html_file = f"{self.out_dir}/{self.app_name}_html.html"
         print(f"\n🟢 Starting capture for {self.app_name} with: {self.url}")
-        tshark_proc = subprocess.Popen(
-            ["tshark", "-i", "eth0", "-a", "duration:40", "-w", self.pcap_file],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        tshark_proc = self.start_pcap_sniffing()
         time.sleep(1)
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False)  # Set to "False" to see what happens

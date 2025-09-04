@@ -14,12 +14,14 @@ class DownloadSniffer(BaseSniffer):
         self.ensure_dir()
         self.setup_driver()
         try:
+            if not self.play_class:
+                tshark_proc = self.start_pcap_sniffing()
+                time.sleep(1)
+                self.setup_website()
+                tshark_proc.wait()
+                return
             self.setup_website()
-            tshark_proc = subprocess.Popen(
-                ["tshark", "-i", "eth0", "-a", "duration:40", "-w", self.pcap_file],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+            tshark_proc = self.start_pcap_sniffing()
             time.sleep(1)
             existing_files = set(os.listdir(self.out_dir))   # Get list of files BEFORE clicking
             clicked = self.click_play_button()
@@ -44,7 +46,7 @@ class DownloadSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[16:]
+    links = load_links_from_excel("Download")[47:]
     for url, play_class, skip_class in links:
         sniffer = DownloadSniffer(url, play_class, skip_class)
         sniffer.sniff()

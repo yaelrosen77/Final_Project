@@ -18,11 +18,7 @@ class GameSniffer(BaseSniffer):
             time.sleep(5)
             print(f"[🎬] Playing <audio> for {wait_time} seconds...")
             if self.skip_class and isinstance(self.skip_class,int): time.sleep(self.skip_class)
-            tshark_proc = subprocess.Popen(
-                ["tshark", "-i", "eth0", "-a", f"duration:{wait_time}", "-w", self.pcap_file],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+            tshark_proc = self.start_pcap_sniffing()
             time.sleep(wait_time)
             tshark_proc.wait()
             return True

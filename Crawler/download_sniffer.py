@@ -24,6 +24,7 @@ class DownloadSniffer(BaseSniffer):
             tshark_proc = self.start_pcap_sniffing()
             time.sleep(1)
             existing_files = set(os.listdir(self.out_dir))   # Get list of files BEFORE clicking
+            self.click_shadow_button()
             clicked = self.click_play_button()
             if self.play_class: self.try_iframes_in_iframe()
             if self.play_class: self.try_iframes()
@@ -46,7 +47,7 @@ class DownloadSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[47:]
+    links = load_links_from_excel("Download")[88:]
     for url, play_class, skip_class in links:
         sniffer = DownloadSniffer(url, play_class, skip_class)
         sniffer.sniff()

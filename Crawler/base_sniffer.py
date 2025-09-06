@@ -48,6 +48,10 @@ class BaseSniffer:
 
     def setup_driver(self):
         options = uc.ChromeOptions()
+        prefs = {
+            "profile.default_content_setting_values.geolocation": 1  # 1=Allow, 2=Block
+        }
+        options.add_experimental_option("prefs", prefs)
         # options.add_argument("--headless=new")
         options.add_argument("--start-maximized")
         options.add_argument("--no-sandbox")
@@ -56,6 +60,8 @@ class BaseSniffer:
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
         self.driver = uc.Chrome(options=options)
+        try: self.driver.execute_cdp_cmd("Emulation.setGeolocationOverride", {"latitude": 32.0853,"longitude": 34.7818,"accuracy": 50})
+        except Exception: pass
         try: version = self.driver.capabilities.get("browserVersion")
         except: pass
     def setup_website(self):
@@ -64,6 +70,7 @@ class BaseSniffer:
         try:
             from selenium.webdriver.common.action_chains import ActionChains
             ActionChains(self.driver).send_keys("thisisunsafe").perform()
+            self.driver.execute_script("if (document.activeElement) document.activeElement.blur();")
             print("⚠️ Bypassed SSL warning screen with 'thisisunsafe'")
         except Exception as e:
             print(f"❌ SSL bypass failed or not needed: {e}")
@@ -109,8 +116,8 @@ class BaseSniffer:
                     return false;
                 """, host, self.skip_class)
                 if clicked:
-                    self.skip_class = ""
                     print(f"✅ - Clicked '{self.skip_class}'")
+                    self.skip_class = ""
                     return
                 else:
                     print(f"❌ - Couldn't find '{self.skip_class}'")

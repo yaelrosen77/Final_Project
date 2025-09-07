@@ -9,9 +9,9 @@ OUTPUT_DIR = "sniff_maps_pcap"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # אותם פרמטרים שהיו לך
-CAPTURE_LIMIT_SEC = 25      # משך צילום לכל אתר (כולל אינטראקציה)
-PAGE_LOAD_WAIT = 6          # המתנה אחרי טעינת הדף לפני תזוזה
-INTERACTION_SEC = 12        # משך "טיול" במפה (pan/zoom)
+CAPTURE_LIMIT_SEC = 15      # משך צילום לכל אתר (כולל אינטראקציה)
+PAGE_LOAD_WAIT = 3          # המתנה אחרי טעינת הדף לפני תזוזה
+INTERACTION_SEC = 7        # משך "טיול" במפה (pan/zoom)
 
 class MapSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
@@ -22,7 +22,7 @@ class MapSniffer(BaseSniffer):
         self.ensure_dir()          # תיקיית פלט לפי הקטגוריה/אפליקציה
         self.setup_driver()        # יצירת ה-driver דרך ה-Base (כולל uc/פרופיל וכו' אם מוגדר שם)
         try:
-            self.setup_website()   # לוגיקת הכנה כללית שלך (עקיפת SSL/גלילה קלה וכו' אם יש ב-Base)
+            self.setup_website()
             time.sleep(PAGE_LOAD_WAIT)
             tshark_proc = self.start_pcap_sniffing()
 
@@ -83,7 +83,7 @@ class MapSniffer(BaseSniffer):
             print(f"⚠️ Geolocation grant failed: {e}")
 
 def sniff_all_maps():
-    links = load_links_from_excel("Maps")[38:]
+    links = load_links_from_excel("Maps")[94:]
     for url, play_class, skip_class in links:
         sniffer = MapSniffer(url, play_class, skip_class)
         sniffer.sniff()

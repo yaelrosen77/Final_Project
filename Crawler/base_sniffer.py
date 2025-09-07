@@ -5,8 +5,10 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 import tldextract
 import pandas as pd
+import re
 
 wait_time = 2
+CLASS_INDEX_RE = re.compile(r'^(?P<class>[A-Za-z0-9_\-:.]+)\[(?P<idx>\d+)\]$')  # <-- ADDED
 
 def load_links_from_excel(sheet_name: str, excel_path="App_direct_links.xlsx"):
     if not os.path.exists(excel_path):
@@ -130,31 +132,44 @@ class BaseSniffer:
         print("############# click_play_button ############  ", end='')
         time.sleep(2)
         groups = [name.strip() for name in self.play_class.split(",") if name.strip()]
-        selectors = [By.ID, By.CLASS_NAME]
         nameDone = [False for _ in range(len(groups))]
         notFoundSoUnloaded = True
         tries += 1
-        for i,name in enumerate(groups):
-            for by in selectors:
+        for i,group in enumerate(groups):
+            for originalName in [a.strip() for a in group.split("|") if a.strip()]:
+                name = originalName
+                idx = 0
+                m = CLASS_INDEX_RE.match(originalName)
+                if m:
+                    name = m.group("class")
+                    idx = int(m.group("idx"))
                 try:
-                    elements = self.driver.find_elements(by,name) if name[0]!=':' else self.driver.find_elements(By.XPATH,f"//button[contains(normalize-space(string()),'{name[1:]}')]")
-                    if len(elements) > 0: notFoundSoUnloaded = False
-                    for element in elements:
-                        try:
-                            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-                            time.sleep(0.5)
-                            if element.tag_name.lower() == "audio": return element
-                            element.click()
-                            print(f"✅ - Clicked '{name}'")
-                            self.after_click(name)
-                            nameDone[i] = True
-                            time.sleep(3)
-                            break
-                        except: continue
+                    if name.startswith(":"):
+                        elements = self.driver.find_elements(By.XPATH, f"//button[contains(normalize-space(string()),'{name[1:]}')]")
+                    else:
+                        elements = self.driver.find_elements(By.CLASS_NAME, name)
+                    if not elements and not name.startswith(":"):
+                        elements = self.driver.find_elements(By.ID, name)
+                    if elements: notFoundSoUnloaded = False
+                    else: raise Exception("no elements found")
+                    if idx < 0 or idx >= len(elements):
+                        print(f"❌ - Class/Name '{name}' has {len(elements)} elements; index {idx} is out of range")
+                        continue
+                    element = elements[idx]
+                    try:
+                        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+                        time.sleep(0.5)
+                        if element.tag_name.lower() == "audio": return element
+                        element.click()
+                        print(f"✅ - Clicked '{name}'")
+                        self.after_click(group)
+                        nameDone[i] = True
+                        time.sleep(3)
+                        break
+                    except: continue
                 except Exception as e:
                     print(f"❌ - Couln't find {name}")
                     continue
-                if nameDone[i]: break
         if notFoundSoUnloaded:
             if tries > 2:
                 print(f"❌ - Unloaded '{self.play_class}'")

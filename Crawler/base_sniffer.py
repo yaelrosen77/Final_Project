@@ -155,21 +155,22 @@ class BaseSniffer:
                     if idx < 0 or idx >= len(elements):
                         print(f"❌ - Class/Name '{name}' has {len(elements)} elements; index {idx} is out of range")
                         continue
-                    element = elements[idx]
-                    try:
-                        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-                        time.sleep(0.5)
-                        if element.tag_name.lower() == "audio": return element
-                        element.click()
-                        print(f"✅ - Clicked '{name}'")
-                        self.after_click(group)
-                        nameDone[i] = True
-                        time.sleep(3)
-                        break
-                    except: continue
+                    for element in elements[idx:]:
+                        try:
+                            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+                            time.sleep(0.5)
+                            if element.tag_name.lower() == "audio": return element
+                            element.click()
+                            print(f"✅ - Clicked '{name}'")
+                            self.after_click(group)
+                            nameDone[i] = True
+                            time.sleep(3)
+                            break
+                        except: continue
                 except Exception as e:
                     print(f"❌ - Couln't find {name}")
                     continue
+                if nameDone[i]: break
         if notFoundSoUnloaded:
             if tries > 2:
                 print(f"❌ - Unloaded '{self.play_class}'")

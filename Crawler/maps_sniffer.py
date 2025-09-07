@@ -83,7 +83,7 @@ class MapSniffer(BaseSniffer):
             print(f"⚠️ Geolocation grant failed: {e}")
 
 def sniff_all_maps():
-    links = load_links_from_excel("Maps")[94:]
+    links = load_links_from_excel("Maps")[99:]
     for url, play_class, skip_class in links:
         sniffer = MapSniffer(url, play_class, skip_class)
         sniffer.sniff()

@@ -3,7 +3,7 @@ from selenium.common.exceptions import NoSuchElementException
 from base_sniffer import BaseSniffer, load_links_from_excel
 from selenium.webdriver.remote.webelement import WebElement
 
-wait_time = 5
+wait_time = 2
 
 import time
 
@@ -46,7 +46,7 @@ class AudioSniffer(BaseSniffer):
             print(f"[✅] capture done: {self.pcap_file}")
 
 def sniff_all_audios():
-    links = load_links_from_excel("Audio Str.")[99:]  #[70:]
+    links = load_links_from_excel("Audio Str.")[11:]  #[99:]
     for url, play_class, skip_class in links:
         sniffer = AudioSniffer(url, play_class, skip_class)
         sniffer.sniff()

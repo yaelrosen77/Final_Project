@@ -26,6 +26,7 @@ class MapSniffer(BaseSniffer):
             time.sleep(PAGE_LOAD_WAIT)
             tshark_proc = self.start_pcap_sniffing()
 
+            self.click_shadow_button()
             clicked = self.click_play_button()
             if self.play_class: self.try_iframes_in_iframe()
             if self.play_class: self.try_iframes()
@@ -83,7 +84,7 @@ class MapSniffer(BaseSniffer):
             print(f"⚠️ Geolocation grant failed: {e}")
 
 def sniff_all_maps():
-    links = load_links_from_excel("Maps")[99:]
+    links = load_links_from_excel("Maps")[107:]
     for url, play_class, skip_class in links:
         sniffer = MapSniffer(url, play_class, skip_class)
         sniffer.sniff()

@@ -1,7 +1,5 @@
-import os, time, tempfile, shutil
-from urllib.parse import urlparse
-from datetime import datetime
-
+import os, time
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from base_sniffer import BaseSniffer, load_links_from_excel
 
@@ -84,7 +82,7 @@ class MapSniffer(BaseSniffer):
             print(f"⚠️ Geolocation grant failed: {e}")
 
 def sniff_all_maps():
-    links = load_links_from_excel("Maps")[107:]
+    links = load_links_from_excel("Maps")[125:]
     for url, play_class, skip_class in links:
         sniffer = MapSniffer(url, play_class, skip_class)
         sniffer.sniff()

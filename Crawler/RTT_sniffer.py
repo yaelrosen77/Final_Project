@@ -7,18 +7,6 @@ CAPTURE_LIMIT_SEC = 30     # כמה שניות לצלם לכל אתר
 PAGE_LOAD_WAIT = 6         # לתת לדף לעלות ולפתוח סוקט/פולינג
 INTERACTION_SEC = 12       # אינטראקציה קלה כדי לשמור את הדף "חי"
 
-GENERIC_TICKER_SELECTORS = [
-    # מנסים לגלול/לפקסס ליד אזורי טיקר נפוצים כדי לייצר עדכונים
-    '[class*="ticker"]',
-    '[class*="marquee"]',
-    '[class*="scroll"]',
-    '[class*="live"]',
-    '[class*="prices"]',
-    '[class*="market"]',
-    '[data-test*="ticker"]',
-    'section[role="feed"]',
-]
-
 class TickerSniffer(BaseSniffer):
     def __init__(self, url, play_class="", skip_class=""):
         super().__init__(url, play_class, skip_class, "Ticker")
@@ -36,20 +24,6 @@ class TickerSniffer(BaseSniffer):
         except Exception:
             pass
 
-        # פוקוס על אזור שנראה כמו טיקר/מחירים כדי לעורר Mutation/WebSocket/polling
-        try:
-            for sel in GENERIC_TICKER_SELECTORS:
-                el = self.driver.execute_script("return document.querySelector(arguments[0]);", sel)
-                if el:
-                    self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
-                    try:
-                        ActionChains(self.driver).move_to_element(el).pause(0.2).perform()
-                    except Exception:
-                        pass
-                    break
-        except Exception:
-            pass
-
     def sniff(self):
         self.ensure_dir()
         self.setup_driver()
@@ -57,54 +31,33 @@ class TickerSniffer(BaseSniffer):
             self.setup_website()
             time.sleep(PAGE_LOAD_WAIT)
 
-            # התחלת הקלטה (pcap) – ה-Base מגדיר את tshark/דגלים
-            cap = self.start_pcap_sniffing()
+            self.click_shadow_button()
+            clicked = self.click_play_button()
+            if self.play_class: self.try_iframes_in_iframe()
+            if self.play_class: self.try_iframes()
 
-            # אינטראקציה קלה שתגרום לדף לפתוח/להמשיך ערוצי עדכון חיים
+            tshark_proc = self.start_pcap_sniffing()
+
             t0 = time.time()
             while time.time() - t0 < INTERACTION_SEC:
                 self._nudge_page()
                 time.sleep(0.8)
-
-            # השלם עד סוף חלון הצילום הכולל כדי ללכוד עוד עדכונים חיים
             left = CAPTURE_LIMIT_SEC - (time.time() - t0) - PAGE_LOAD_WAIT
             if left > 0:
                 time.sleep(left)
 
-            try:
-                cap.wait(timeout=3)
-            except Exception:
-                pass
+            tshark_proc.wait()
         finally:
             try:
                 self.driver.quit()
             except Exception:
                 pass
 
-
 def sniff_all_tickers():
-    """
-    אם יש לך אקסל עם רשימת אתרים – טען משם.
-    אחרת, פשוט בנה כאן רשימה ידנית (urls) והריץ.
-    """
-    try:
-        # דוגמה: גיליון בשם "Tickers" עם עמודה URL (כמו בשאר הסניפרים שלך)
-        links = load_links_from_excel("Tickers")
-        urls = [u for (u, *_rest) in links]
-    except Exception:
-        # fallback – הדבק כאן רשימת URL ידנית אם צריך
-        urls = [
-            "https://www.bloomberg.com/markets",
-            "https://finance.yahoo.com/",
-            "https://www.tradingview.com/",
-            "https://www.reuters.com/markets",
-            "https://www.coinmarketcap.com/",
-        ]
-
-    for url in urls:
-        sniffer = TickerSniffer(url)
+    links = load_links_from_excel("RTT")[78:]
+    for url, play_class, skip_class in links:
+        sniffer = TickerSniffer(url, play_class, skip_class)
         sniffer.sniff()
-
 
 if __name__ == "__main__":
     sniff_all_tickers()

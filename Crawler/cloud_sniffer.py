@@ -41,7 +41,7 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
             page.wait_for_selector(input_selector, timeout=20000, state="attached")
 
             tshark_proc = subprocess.Popen(
-                ["tshark", "-i", "eth0", "-a", "duration:40", "-w", pcap_file],
+                ["tshark", "-i", "eth0", "-a", "duration:10", "-w", pcap_file],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
@@ -82,9 +82,9 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
     print(f"✅ Upload capture done: {pcap_file}")
 
 def sniff_all_cloud():
-    links = load_links_from_excel("Cloud")[0:]
+    links = load_links_from_excel("Cloud")[:]
     for url, play_class, pre_class in links:
-        for i in range(5):
+        for i in range(1):
             sniff_cloud_upload(url, play_class, pre_class)
 
 if __name__ == "__main__":

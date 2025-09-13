@@ -16,22 +16,22 @@ def sniff_cloud_upload(url, play_class="", pre_class=""):
     out_dir = os.path.join(script_dir, "Crawler", "assets", "upload_capture")
     ensure_dir(out_dir)
     pcap_file = os.path.join(out_dir, f"{app_name}_upload.pcap")
-    html_file = os.path.join(out_dir, f"{app_name}_html.html")
+    # html_file = os.path.join(out_dir, f"{app_name}_html.html")
     print(f"[PATH] Saving results under: {out_dir}")
 
     print(f"\n🟢 Starting cloud upload capture for {app_name}...")
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
         page = context.new_page()
 
         try:
             page.goto(url, timeout=90000, wait_until="domcontentloaded")
 
-            with open(html_file, "w", encoding="utf-8") as f:
-                f.write(page.content())
-            print(f"[📄] HTML saved to {html_file}")
+            # with open(html_file, "w", encoding="utf-8") as f:
+            #     f.write(page.content())
+            # print(f"[📄] HTML saved to {html_file}")
 
             fake_file = os.path.abspath("dummy_upload.txt")
             with open(fake_file, "w") as f:

@@ -27,7 +27,7 @@ def sniff_file_download(url, play_class="", pre_class=""):
     time.sleep(1)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
 
@@ -86,7 +86,7 @@ def sniff_file_download(url, play_class="", pre_class=""):
     print(f"✅ Sniffing complete: {pcap_file}")
 
 def sniff_all_downloads():
-    links = load_links_from_excel("Download")[179:]
+    links = load_links_from_excel("Download")[177:]
     for url, play_class, pre_class in links:
         sniff_file_download(url, play_class, pre_class)
 

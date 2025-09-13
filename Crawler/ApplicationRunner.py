@@ -7,11 +7,11 @@ from audio_sniffer import sniff_all_audios
 from game_sniffer import sniff_all_games
 
 def main():
-    print("\n🎬 Capturing video traffic...")
-    sniff_all_videos()
+    # print("\n🎬 Capturing video traffic...")
+    # sniff_all_videos()
 
-    print("\n🌐 Capturing browsing traffic...")
-    sniff_all_browsing()
+    # print("\n🌐 Capturing browsing traffic...")
+    # sniff_all_browsing()
 
     print("\n🎮 Capturing Game traffic...")
     sniff_all_games()

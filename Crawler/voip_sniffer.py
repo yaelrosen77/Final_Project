@@ -25,7 +25,7 @@ def sniff_voip(url):
 
     time.sleep(1)
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(permissions=["microphone", "camera"])
         page = context.new_page()
         page.goto(url, timeout=60000, wait_until="domcontentloaded")

@@ -15,7 +15,7 @@ def sniff_browsing(url):
     ensure_dir(out_dir)
 
     pcap_file = f"{out_dir}/{app_name}_browse.pcap"
-    html_file = f"{out_dir}/{app_name}_html.html"
+    # html_file = f"{out_dir}/{app_name}_html.html"
 
     print(f"\n🟢 Starting browsing capture for {app_name}...")
 
@@ -29,17 +29,17 @@ def sniff_browsing(url):
     time.sleep(1)  # Allow tshark to start before the browser
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # Set to False to see what happens
+        browser = p.chromium.launch(headless=True)  # Set to False to see what happens
         context = browser.new_context()
         page = context.new_page()
 
         try:
             page.goto(url, timeout=60000, wait_until="domcontentloaded")
 
-            # Save the HTML content
-            with open(html_file, "w", encoding="utf-8") as f:
-                f.write(page.content())
-            print(f"[📄] HTML saved to {html_file}")
+            ## Save the HTML content
+            # with open(html_file, "w", encoding="utf-8") as f:
+            #     f.write(page.content())
+            # print(f"[📄] HTML saved to {html_file}")
 
             # Scroll and interact with the page
             for _ in range(3):
@@ -67,7 +67,7 @@ def sniff_browsing(url):
     print(f"✅ Browsing capture done: {pcap_file}")
 
 def sniff_all_browsing():
-    links = load_links_from_excel("Browsing")[:3]
+    links = load_links_from_excel("Browsing")[:]
     for url, _, _ in links:
         sniff_browsing(url)
 

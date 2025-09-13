@@ -28,17 +28,21 @@ def try_iframes_for_game(driver,play_class) -> bool:
 
 def sniff_game(url, play_class="", pre_class=""):
     app_name = get_app_name(url)
-    out_dir = f"/app/game"
+    out_dir = f"/app/game"            # this maps to your Windows ...\Crawler\game when using -v
     ensure_dir(out_dir)
     pcap_file = f"{out_dir}/{app_name}_game.pcap"
     print(f"\n🟢 Starting game capture for {app_name}...")
 
     options = uc.ChromeOptions()
-    options.add_argument("--start-maximized")
+    options.add_argument("--headless=new")          # <<< run headless in Docker
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    driver = uc.Chrome(options=options)
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+    options.binary_location = "/usr/bin/chromium"   # <<< tell it where Chromium is
+
+    # Important: also pass the binary path to uc (helps with version mismatches)
+    driver = uc.Chrome(options=options, browser_executable_path="/usr/bin/chromium")
 
     try:
         print(f"[⚙️] Opening: {url}")
@@ -48,19 +52,14 @@ def sniff_game(url, play_class="", pre_class=""):
         clicked = False
         if play_class:
             clicked = click_by_class(driver, play_class)
-        if not clicked:
-            if not try_iframes_for_game(driver,play_class):
-                print("[❌] No play button found.")
-                return
+        if not clicked and not try_iframes_for_game(driver, play_class):
+            print("[❌] No play button found.")
+            return
 
         print("[🎮] Starting tshark before game plays...")
-
-        # SKIP ADS IF POP UP
-
         tshark_proc = subprocess.Popen(
             ["tshark", "-i", "eth0", "-a", f"duration:{wait_time}", "-w", pcap_file],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
 
         print(f"[🎬] Playing game for {wait_time} seconds...")

@@ -31,3 +31,9 @@ Project shared email and password :
 * fewshotproject@yahoo.com
 * Xt!.CJZBdmK!5t4
 
+Building and Running the docker.
+docker build -t myapp .
+
+docker run --rm -v ${PWD}:/app --cap-add=NET_ADMIN --cap-add=NET_RAW myapp
+
+

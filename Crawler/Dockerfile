@@ -35,4 +35,5 @@ RUN adduser --disabled-password --gecos '' tshark && \
     setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 
 # 🏁 ברירת מחדל: הרץ את הסניפר הראשי
+ENV PYTHONUNBUFFERED=1
 CMD ["python", "ApplicationRunner.py"]
